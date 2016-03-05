@@ -15,4 +15,4 @@ SimpleBLEPeripheral--CC2540F256 Connects Android Phone BLE
 	2.Android手机安装BLE Scanner,可对蓝牙模块进行扫描并连接，连接后读取蓝牙模块的Profile，此时LED1灭，LED3亮。
 	3.利用BLE Scanner对蓝牙模块得特征值进行读写，可控制其LED2灯的亮灭。
 	
-##在线视频：<iframe frameborder="0" width="640" height="498" src="http://v.qq.com/iframe/player.html?vid=g0187emp7yw&tiny=0&auto=0" allowfullscreen></iframe>
+##在线视频：<iframe width="560" height="315" src="https://www.youtube.com/embed/yIuFUvhWs0A" frameborder="0" allowfullscreen></iframe>
