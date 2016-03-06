@@ -86,6 +86,7 @@
 #include "hal_drivers.h"
 #include "hal_adc.h"
 #include "hal_key.h"
+#include "hal_led.h"
 #include "osal.h"
 
 #if (defined HAL_KEY) && (HAL_KEY == TRUE)
@@ -526,7 +527,9 @@ void halProcessKeyInterrupt (void)
 #endif
   if (valid)
   {
+    HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
     osal_start_timerEx (Hal_TaskID, HAL_KEY_EVENT, HAL_KEY_DEBOUNCE_VALUE);
+    //当osal_start_timerEx()函数设置的定时时间到达后，出发Hal_ProcessEvent()处理函数
   }
 }
 

@@ -195,16 +195,16 @@ static uint8 advertData[] =
   // Flags; this sets the device to use limited discoverable
   // mode (advertises for 30 seconds at a time) instead of general
   // discoverable mode (advertises indefinitely)
-  0x02,   // length of this data
-  GAP_ADTYPE_FLAGS,
-  DEFAULT_DISCOVERABLE_MODE | GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
-
+  0x02,   // length of this data                                        //0x02
+  GAP_ADTYPE_FLAGS,                                                     //0x01
+  DEFAULT_DISCOVERABLE_MODE | GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,     //0x05
+                                                                            
   // service UUID, to notify central devices what services are included
   // in this peripheral
-  0x03,   // length of this data
-  GAP_ADTYPE_16BIT_MORE,      // some of the UUID's, but not all
-  LO_UINT16( SIMPLEPROFILE_SERV_UUID ),
-  HI_UINT16( SIMPLEPROFILE_SERV_UUID ),
+  0x03,   // length of this data                                        //0x03
+  GAP_ADTYPE_16BIT_MORE,      // some of the UUID's, but not all        //0x02
+  LO_UINT16( SIMPLEPROFILE_SERV_UUID ),                                 //0xF0
+  HI_UINT16( SIMPLEPROFILE_SERV_UUID ),                                 //0xFF
 
 };
 
@@ -562,7 +562,6 @@ static void simpleBLEPeripheral_HandleKeys( uint8 shift, uint8 keys )
 
   if ( keys & HAL_KEY_SW_2 )    //S2°´¼ü
   {
-
     NPI_WriteTransport("KEY K1\n",7);
   }
 }

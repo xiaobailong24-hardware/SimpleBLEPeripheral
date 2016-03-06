@@ -193,7 +193,7 @@ static uint8 simpleProfileChar5UserDesp[17] = "Characteristic 5";
 static uint8 simpleProfileChar6Props = GATT_PROP_READ | GATT_PROP_WRITE;
 
 // Characteristic 6 Value
-static uint8 simpleProfileChar6[SIMPLEPROFILE_CHAR6_LEN] = {0,0,0,0,0};
+static uint8 simpleProfileChar6[SIMPLEPROFILE_CHAR6_LEN] = { 0, 0, 0, 0, 0 };
 
 // Simple Profile Characteristic 6 User Description
 static uint8 simpleProfileChar6UserDesp[17] = "Characteristic 6";
@@ -355,7 +355,7 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
         simpleProfileChar6 
       },
 
-      // Characteristic 1 User Description
+      // Characteristic 6 User Description
       { 
         { ATT_BT_UUID_SIZE, charUserDescUUID },
         GATT_PERMIT_READ, 

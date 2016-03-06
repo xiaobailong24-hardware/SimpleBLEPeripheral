@@ -1,94 +1,94 @@
-"C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\Source\SimpleBLEPeripheral_Main.c"
+"C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\Source\SimpleBLEPeripheral_Main.c"
 -std=c99
 -ferror-limit=100
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\common
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\common
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\include
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\include
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\hal\include
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\hal\include
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\hal\target\CC2540EB
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\hal\target\CC2540EB
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\osal\include
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\osal\include
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\services\saddr
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\services\saddr
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\ble\include
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\ble\include
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\ble\controller\CC254x\phy
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\ble\controller\CC254x\phy
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\ble\controller\CC254x\include
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\ble\controller\CC254x\include
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\ble\hci
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\ble\hci
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\ble\host
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\ble\host
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\ble\ROM
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\..\..\Components\ble\ROM
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\common\cc2540
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\common\cc2540
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\common\npi\npi_np
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\common\npi\npi_np
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\Roles\CC254x
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\Roles\CC254x
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\Roles
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\Roles
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\SimpleProfile\CC254x
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\SimpleProfile\CC254x
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\SimpleProfile
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\SimpleProfile
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\DevInfo
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\DevInfo
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\Keys\CC254x
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\Keys\CC254x
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\Keys
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\..\..\Profiles\Keys
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\8051\inc
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\8051\inc\clib
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\common
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\common
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\include
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\include
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Components\hal\include
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Components\hal\include
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Components\hal\target\CC2540EB
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Components\hal\target\CC2540EB
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Components\osal\include
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Components\osal\include
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Components\services\saddr
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Components\services\saddr
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Components\ble\include
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Components\ble\include
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Components\ble\controller\CC254x\phy
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Components\ble\controller\CC254x\phy
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Components\ble\controller\CC254x\include
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Components\ble\controller\CC254x\include
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Components\ble\hci
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Components\ble\hci
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Components\ble\host
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Components\ble\host
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Components\ble\ROM
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Components\ble\ROM
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\common\cc2540
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\common\cc2540
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\common\npi\npi_np
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\common\npi\npi_np
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\Profiles\Roles\CC254x
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\Profiles\Roles\CC254x
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\Profiles\Roles
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\Profiles\Roles
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\Profiles\SimpleProfile\CC254x
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\Profiles\SimpleProfile\CC254x
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\Profiles\SimpleProfile
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\Profiles\SimpleProfile
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\Profiles\DevInfo
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\Profiles\DevInfo
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\Profiles\Keys\CC254x
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\Profiles\Keys\CC254x
 -I
-C:\Texas Instruments\BLE-CC254x-1.4.1.43908b\Projects\ble\Profiles\Keys
+C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\Profiles\Keys
 -DINT_HEAP_LEN=3072
 -DHALNODEBUG=1
 -DOSAL_CBTIMER_NUM_TASKS=1

@@ -222,6 +222,8 @@ uint16 Hal_ProcessEvent( uint8 task_id, uint16 events )
 #if (defined HAL_KEY) && (HAL_KEY == TRUE)
     /* Check for keys */
     HalKeyPoll();
+    //接下来HAL层发送一个OSAL消息给应用层，通过应用层的事件处理函数来处理OSAL消息，
+    //SimpleBLEPeripheral_ProcessEvent()
 
     /* if interrupt disabled, do next polling */
     if (!Hal_KeyIntEnable)
