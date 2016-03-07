@@ -1441,6 +1441,7 @@
           <state>HAL_LED=TRUE</state>
           <state>HAL_KEY=TRUE</state>
           <state>HAL_UART=TRUE</state>
+          <state>HAL_UART_USB=FALSE</state>
           <state>LCD_TO_UART=TRUE</state>
           <state>WEBEE_BOARD</state>
         </option>
@@ -9487,6 +9488,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\common\cc2540\OnBoard.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\cc2540\Serial.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\cc2540\Serial.h</name>
     </file>
   </group>
 </project>

@@ -45,6 +45,7 @@
 #include "OSAL.h"
 #include "OnBoard.h"
 #include "hal_assert.h"
+#include "serial.h"
 
 #if defined (ZTOOL_P1) || defined (ZTOOL_P2)
   #include "DebugTrace.h"
@@ -272,8 +273,11 @@ void HalLcdInit(void)
  **************************************************************************************************/
 void HalLcdWriteString ( char *str, uint8 option)
 {
+  
+  SerialPrintf("%s\r\n", str);
  
 #ifdef LCD_TO_UART
+    SerialPrintf("%s\r\n", str);
     NPI_WriteTransport((uint8*)str,osal_strlen(str));
     NPI_WriteTransport("\n",1);
 #endif

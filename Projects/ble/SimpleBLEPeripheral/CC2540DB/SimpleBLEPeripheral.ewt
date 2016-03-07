@@ -8059,6 +8059,12 @@
     <file>
       <name>$PROJ_DIR$\..\..\common\cc2540\OnBoard.h</name>
     </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\cc2540\Serial.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\cc2540\Serial.h</name>
+    </file>
   </group>
 </project>
 

@@ -86,6 +86,7 @@ int main(void)
 
   /* Initialize the operating system */
   osal_init_system();
+  
 
   /* Enable interrupts */
   HAL_ENABLE_INTERRUPTS();
@@ -96,9 +97,7 @@ int main(void)
   #if defined ( POWER_SAVING )
     osal_pwrmgr_device( PWRMGR_BATTERY );
   #endif
-
- //   HalLedSet(HAL_LED_1,HAL_LED_MODE_ON);
-    
+ 
   /* Start OSAL */
   osal_start_system(); // No Return from here
 

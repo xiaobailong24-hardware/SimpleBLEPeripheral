@@ -60,7 +60,11 @@
 #include "gattservapp.h"
 #include "devinfoservice.h"
 #include "simpleGATTprofile.h"
+#include "serial.h"
+#include "osal_snv.h"
+#include "npi.h"
 
+ 
 #if defined( CC2540_MINIDK )
   #include "simplekeys.h"
 #endif
@@ -144,6 +148,10 @@
 /*********************************************************************
  * LOCAL VARIABLES
  */
+
+static uint8 SerialRxBuf[128]={0};
+static uint8 RxIndex = 0;
+
 static uint8 simpleBLEPeripheral_TaskID;   // Task ID for internal task/event processing
 
 static gaprole_States_t gapProfileState = GAPROLE_INIT;
@@ -231,6 +239,7 @@ static char *bdAddr2Str ( uint8 *pAddr );
 
 //串口接收回掉函数
 static void NpiSerialCallback(uint8 port,uint8 events);
+void Serial_Init(void);
 
 
 /*********************************************************************
@@ -281,6 +290,7 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
   //Npi Uart Init
   NPI_InitTransport(NpiSerialCallback);
   NPI_WriteTransport("HelloWorld\n",12);
+  Serial_Init();      // 串口初始化
 
   //Register for all key events - This app will handle all key events
   RegisterForKeys(simpleBLEPeripheral_TaskID);
@@ -477,7 +487,19 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
   {
     // Start the Device
     VOID GAPRole_StartDevice( &simpleBLEPeripheral_PeripheralCBs );
-
+    
+    //开机读取Flash
+    Serial_Init();      // 串口初始化
+    uint8 reStatus = osal_snv_read( BLE_NVID_CUST_START,  128, SerialRxBuf);
+    if(SUCCESS == reStatus)
+    {
+      SerialPrintf("Read Snv ID %d success \r\n Value is:\"%s\"\r\n", BLE_NVID_CUST_START, SerialRxBuf);
+    }
+    else
+    {
+        SerialPrintf("Read Snv ID %d failed\r\n",  BLE_NVID_CUST_START);
+    }
+  
     // Start Bond Manager
     VOID GAPBondMgr_Register( &simpleBLEPeripheral_BondMgrCBs );
 
@@ -500,7 +522,25 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
 
     return (events ^ SBP_PERIODIC_EVT);
   }
-
+  //串口接收事件
+  if ( events & UART_EVENT )
+  {
+    NPI_WriteTransport("UART_EVENT\r\n",10);
+    uint8 wrStatus = osal_snv_write( BLE_NVID_CUST_START, osal_strlen(SerialRxBuf), SerialRxBuf);    
+    if(SUCCESS == wrStatus)
+    {
+        SerialPrintf("Save \"%s\" to Snv ID %d success\r\n", SerialRxBuf, BLE_NVID_CUST_START);
+    }
+    else
+    {
+        NPI_WriteTransport("Save Failed\n",12);
+    }
+    osal_memset(SerialRxBuf, 0, 128);
+    
+    return (events ^ UART_EVENT);
+  }
+   
+  
   // Discard unknown events
   return 0;
 }
@@ -551,7 +591,6 @@ static void simpleBLEPeripheral_ProcessOSALMsg( osal_event_hdr_t *pMsg )
  */
 static void simpleBLEPeripheral_HandleKeys( uint8 shift, uint8 keys )
 {
-  uint8 SK_Keys = 0;
 
   VOID shift;  // Intentionally unreferenced parameter
 
@@ -562,7 +601,7 @@ static void simpleBLEPeripheral_HandleKeys( uint8 shift, uint8 keys )
 
   if ( keys & HAL_KEY_SW_2 )    //S2按键
   {
-    NPI_WriteTransport("KEY K1\n",7);
+    NPI_WriteTransport("KEY K2\n",7);
   }
 }
 #endif // #if defined( CC2540_MINIDK )
@@ -896,6 +935,75 @@ static void NpiSerialCallback(uint8 port,uint8 events)
         }
     }
 }
+
+
+
+/*****************************************************************************
+ 函 数 名  : SerialCb
+ 功能描述  : 串口通讯回调
+ 输入参数  : uint8 port
+             uint8 events
+ 输出参数  : 无
+ 返 回 值  :
+ 调用函数  :
+ 被调函数  :
+
+ 修改历史      :
+  1.日    期   : 2014年3月22日
+    作    者   :  谢贤斌
+    修改内容   : 新生成函数
+
+*****************************************************************************/
+static void SerialCb( uint8 port, uint8 events )
+{
+    if((events & HAL_UART_TX_EMPTY)||( events & HAL_UART_TX_FULL ))  // 发送区满或者空
+    {
+        return;
+    }
+    uint16 usRxBufLen = Hal_UART_RxBufLen(HAL_UART_PORT_0);  // 读取接收据量
+    if(usRxBufLen)
+    {
+        usRxBufLen = MIN(128,usRxBufLen);
+        uint16 readLen = HalUARTRead(HAL_UART_PORT_0, &SerialRxBuf[RxIndex], usRxBufLen);   // 读取数据到缓冲区
+ //       NPI_WriteTransport(readLen,usRxBufLen);
+        RxIndex += readLen;
+        readLen %= 128;
+        osal_start_timerEx(simpleBLEPeripheral_TaskID, UART_EVENT, 5);  // 启动定时器
+    }
+}
+
+
+
+/*****************************************************************************
+ 函 数 名  : Serial_Open
+ 功能描述  : 打开串口
+ 输入参数  : taskId 任务ID
+ 输出参数  : 无
+ 返 回 值  : static
+ 调用函数  :
+ 被调函数  :
+
+ 修改历史      :
+  1.日    期   : 2014年4月30日
+    作    者   :  谢贤斌
+    修改内容   : 新生成函数
+
+*****************************************************************************/
+static void Serial_Init(void)
+{
+    halUARTCfg_t SerialCfg = {0};
+
+    SerialCfg.baudRate = HAL_UART_BR_115200;    // 波特率
+    SerialCfg.flowControl = HAL_UART_FLOW_OFF;  // 流控制
+
+    SerialCfg.callBackFunc = SerialCb;          // 回调函数
+    SerialCfg.intEnable    = TRUE;
+    SerialCfg.configured   = TRUE;
+    HalLcdWriteString( "Open Uart0", HAL_LCD_LINE_5 );    // 在第5行显示启动信息
+    HalUARTOpen(HAL_UART_PORT_0, &SerialCfg);
+    HalUARTWrite(HAL_UART_PORT_0, "Serial_Init\r\n", osal_strlen("Serial_Init\r\n"));
+}
+
 
 /*********************************************************************
 *********************************************************************/

@@ -409,9 +409,18 @@ st( \
 #ifndef HAL_UART
 #if (defined ZAPP_P1) || (defined ZAPP_P2) || (defined ZTOOL_P1) || (defined ZTOOL_P2)
 #define HAL_UART TRUE
+#define HAL_UART_USB  0
 #else
 #define HAL_UART FALSE
 #endif
+#endif
+
+#ifndef HAL_UART_USB
+# if HAL_UART
+#  define HAL_UART_USB 1
+# else
+#  define HAL_UART_USB 0
+# endif
 #endif
 
 #if HAL_UART

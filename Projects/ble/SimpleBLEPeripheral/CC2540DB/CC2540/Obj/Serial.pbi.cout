@@ -1,4 +1,4 @@
-"C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Components\osal\common\OSAL.c"
+"C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\common\cc2540\Serial.c"
 -std=c99
 -ferror-limit=100
 -I
