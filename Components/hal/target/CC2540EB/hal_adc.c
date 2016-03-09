@@ -107,7 +107,7 @@ void HalAdcInit (void)
  * @brief   Read the ADC based on given channel and resolution
  *
  * @param   channel - channel where ADC will be read
- * @param   resolution - the resolution of the value
+ * @param   resolution - the resolution of the value,·Ö±æÂÊ
  *
  * @return  16 bit value of the ADC in offset binary format.
  *

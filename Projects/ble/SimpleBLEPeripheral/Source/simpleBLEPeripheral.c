@@ -346,13 +346,13 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
     uint8 charValue3 = 3;
     uint8 charValue4 = 4;
     uint8 charValue5[SIMPLEPROFILE_CHAR5_LEN] = { 1, 2, 3, 4, 5 };
-    uint8 charValue6[SIMPLEPROFILE_CHAR6_LEN] = { 1, 2, 3, 4, 5 };
+//    uint8 charValue6[SIMPLEPROFILE_CHAR6_LEN] = { 1, 2 };
     SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR1, sizeof ( uint8 ), &charValue1 );
     SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR2, sizeof ( uint8 ), &charValue2 );
     SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR3, sizeof ( uint8 ), &charValue3 );
     SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof ( uint8 ), &charValue4 );
     SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR5, SIMPLEPROFILE_CHAR5_LEN, charValue5 );
-    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 );
+//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 );
   }
 
 
@@ -464,11 +464,11 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
     uint8 reStatus = osal_snv_read( BLE_NVID_CUST_START,  128, SerialRxBuf);
     if(SUCCESS == reStatus)
     {
-      SerialPrintf("Read Snv ID %d success \r\n Value is:\"%s\"\r\n", BLE_NVID_CUST_START, SerialRxBuf);
+      SerialPrintf("Read Snv ID %d success \n Value is:\"%s\"\r\n", BLE_NVID_CUST_START, SerialRxBuf);
     }
     else
     {
-        SerialPrintf("Read Snv ID %d failed\r\n",  BLE_NVID_CUST_START);
+        SerialPrintf("Read Snv ID %d failed\n",  BLE_NVID_CUST_START);
     }
   
     // Start Bond Manager
@@ -490,7 +490,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
     }
 
     //执行周期任务
-    NPI_WriteTransport("SBP_PERIODIC_EVT\r\n",10);
+    NPI_WriteTransport("SBP_PERIODIC_EVT\n",17);
 
     // Perform periodic application task
     performPeriodicTask();
@@ -500,7 +500,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
   //串口接收事件
   if ( events & UART_EVENT )
   {
-    NPI_WriteTransport("UART_EVENT\r\n",10);
+    NPI_WriteTransport("UART_EVENT\n",10);
     //flash写入，一个ID可以写252个字节的数据
     uint8 wrStatus = osal_snv_write( BLE_NVID_CUST_START, osal_strlen(SerialRxBuf), SerialRxBuf);    
     if(SUCCESS == wrStatus)
@@ -794,13 +794,27 @@ static void performPeriodicTask( void )
 {
   uint8 valueToCopy;
   uint8 stat;
-  uint8 sendNotify[10] = {0,1,2,3,4,5,6,7,8,9};
+  uint16 adValue;
+  uint8 adLow, adHigh;
+  float Voltage = 0.0;
   
-  for(int i=0;i<10;i++)
-  {
-      SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof(uint8), &sendNotify[i]);
-  }
+  //ADC
 
+  HalAdcSetReference(HAL_ADC_REF_AVDD);     //3.3V
+  adValue = HalAdcRead(HAL_ADC_CHANNEL_6,HAL_ADC_RESOLUTION_12);
+  Voltage=((float)adValue/2048)*3.37;
+        
+  adLow = (uint8)(adValue&0xff);
+  adHigh = (uint8)(adValue>>8);
+  
+  SerialPrintf("adValue %d \n",  adValue);
+  SerialPrintf("adLow %d \n",  adLow);
+  SerialPrintf("adHigh %d \n",  adHigh);
+  SerialPrintf("Voltage %f \n",  Voltage);
+  
+  uint8 charValue6[SIMPLEPROFILE_CHAR6_LEN] = { adHigh, adLow };      
+  SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 );
+    
   // Call to retrieve the value of the third characteristic in the profile
   stat = SimpleProfile_GetParameter( SIMPLEPROFILE_CHAR3, &valueToCopy);
 
