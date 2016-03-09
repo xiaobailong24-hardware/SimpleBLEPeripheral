@@ -1444,6 +1444,7 @@
           <state>HAL_UART_USB=FALSE</state>
           <state>LCD_TO_UART=TRUE</state>
           <state>WEBEE_BOARD</state>
+          <state>HAL_ADC=TRUE</state>
         </option>
         <option>
           <name>CCPreprocFile</name>

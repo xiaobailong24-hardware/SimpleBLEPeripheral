@@ -103,6 +103,7 @@ C:\Users\LiuYinlong\Documents\GitHub\SimpleBLEPeripheral\Projects\ble\Profiles\K
 -DHAL_UART_USB=FALSE
 -DLCD_TO_UART=TRUE
 -DWEBEE_BOARD=1
+-DHAL_ADC=TRUE
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
 -D__CHAR_MIN__=0

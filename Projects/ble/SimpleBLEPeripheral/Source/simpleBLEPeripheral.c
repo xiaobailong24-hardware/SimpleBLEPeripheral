@@ -5,36 +5,6 @@
 
   Description:    This file contains the Simple BLE Peripheral sample application
                   for use with the CC2540 Bluetooth Low Energy Protocol Stack.
-
-  Copyright 2010 - 2014 Texas Instruments Incorporated. All rights reserved.
-
-  IMPORTANT: Your use of this Software is limited to those specific rights
-  granted under the terms of a software license agreement between the user
-  who downloaded the software, his/her employer (which must be your employer)
-  and Texas Instruments Incorporated (the "License").  You may not use this
-  Software unless you agree to abide by the terms of the License. The License
-  limits your use, and you acknowledge, that the Software may not be modified,
-  copied or distributed unless embedded on a Texas Instruments microcontroller
-  or used solely and exclusively in conjunction with a Texas Instruments radio
-  frequency transceiver, which is integrated into your product.  Other than for
-  the foregoing purpose, you may not use, reproduce, copy, prepare derivative
-  works of, modify, distribute, perform, display or sell this Software and/or
-  its documentation for any purpose.
-
-  YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-  INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
-  NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
-  TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
-  NEGLIGENCE, STRICT LIABILITY, CONTRIBUTION, BREACH OF WARRANTY, OR OTHER
-  LEGAL EQUITABLE THEORY ANY DIRECT OR INDIRECT DAMAGES OR EXPENSES
-  INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE
-  OR CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT
-  OF SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
-  (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
-
-  Should you have any questions regarding your right to use this Software,
-  contact Texas Instruments Incorporated at www.TI.com.
 **************************************************************************************************/
 
 /*********************************************************************
@@ -162,12 +132,12 @@ static uint8 scanRspData[] =
   // complete name
   0x14,   // length of this data
   GAP_ADTYPE_LOCAL_NAME_COMPLETE,
-  0x53,   // 'S'
-  0x69,   // 'i'
-  0x6d,   // 'm'
-  0x70,   // 'p'
-  0x6c,   // 'l'
-  0x65,   // 'e'
+  0x43,   // 'S'        C
+  0x43,   // 'i'        C
+  0x32,   // 'm'        2
+  0x35,   // 'p'        5
+  0x34,   // 'l'        4
+  0x30,   // 'e'        0
   0x42,   // 'B'
   0x4c,   // 'L'
   0x45,   // 'E'
@@ -482,7 +452,8 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
     // return unprocessed events
     return (events ^ SYS_EVENT_MSG);
   }
-
+  
+  //¿ª»úÊÂ¼þ
   if ( events & SBP_START_DEVICE_EVT )
   {
     // Start the Device
@@ -508,7 +479,8 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
 
     return ( events ^ SBP_START_DEVICE_EVT );
   }
-
+  
+  //ÖÜÆÚÊÂ¼þ
   if ( events & SBP_PERIODIC_EVT )
   {
     // Restart timer
@@ -516,6 +488,9 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
     {
       osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PERIODIC_EVT, SBP_PERIODIC_EVT_PERIOD );
     }
+
+    //Ö´ÐÐÖÜÆÚÈÎÎñ
+    NPI_WriteTransport("SBP_PERIODIC_EVT\r\n",10);
 
     // Perform periodic application task
     performPeriodicTask();
@@ -526,6 +501,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
   if ( events & UART_EVENT )
   {
     NPI_WriteTransport("UART_EVENT\r\n",10);
+    //flashÐ´Èë£¬Ò»¸öID¿ÉÒÔÐ´252¸ö×Ö½ÚµÄÊý¾Ý
     uint8 wrStatus = osal_snv_write( BLE_NVID_CUST_START, osal_strlen(SerialRxBuf), SerialRxBuf);    
     if(SUCCESS == wrStatus)
     {
@@ -539,7 +515,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
     
     return (events ^ UART_EVENT);
   }
-   
+  
   
   // Discard unknown events
   return 0;
@@ -818,6 +794,12 @@ static void performPeriodicTask( void )
 {
   uint8 valueToCopy;
   uint8 stat;
+  uint8 sendNotify[10] = {0,1,2,3,4,5,6,7,8,9};
+  
+  for(int i=0;i<10;i++)
+  {
+      SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof(uint8), &sendNotify[i]);
+  }
 
   // Call to retrieve the value of the third characteristic in the profile
   stat = SimpleProfile_GetParameter( SIMPLEPROFILE_CHAR3, &valueToCopy);
