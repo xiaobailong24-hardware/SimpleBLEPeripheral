@@ -800,7 +800,7 @@ static void performPeriodicTask( void )
   
   //PulseSensor
   pulseNum += 1;
-  if(pulseNum % 2 == 0)
+  if(pulseNum % 10 == 0)
   {
       pulseValue = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_12);         //IN1
       pulseLow = (uint8)(pulseValue&0xff);
