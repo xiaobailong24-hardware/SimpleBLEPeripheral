@@ -59,7 +59,7 @@
  */
 
 // How often to perform periodic event
-#define SBP_PERIODIC_EVT_PERIOD                   5000
+#define SBP_PERIODIC_EVT_PERIOD                   1
 
 // What is the advertising interval when device is discoverable (units of 625us, 160=100ms)
 #define DEFAULT_ADVERTISING_INTERVAL          160
@@ -490,7 +490,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
     }
 
     //执行周期任务
-    NPI_WriteTransport("SBP_PERIODIC_EVT\n",17);
+//    NPI_WriteTransport("SBP_PERIODIC_EVT\n",17);
 
     // Perform periodic application task
     performPeriodicTask();
@@ -792,42 +792,39 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
  */
 static void performPeriodicTask( void )
 {
-  uint8 valueToCopy;
-  uint8 stat;
-  uint16 adValue;
-  uint8 adLow, adHigh;
-  float Voltage = 0.0;
-  
-  //ADC
-
+  static uint16 pulseNum = 0;   //两秒采集一次Pulse
+  uint16 pulseValue;
+  uint8 pulseLow, pulseHigh;
+//  float Voltage = 0.0;
   HalAdcSetReference(HAL_ADC_REF_AVDD);     //3.3V
-  adValue = HalAdcRead(HAL_ADC_CHANNEL_6,HAL_ADC_RESOLUTION_12);
-  Voltage=((float)adValue/2048)*3.37;
-        
-  adLow = (uint8)(adValue&0xff);
-  adHigh = (uint8)(adValue>>8);
   
-  SerialPrintf("adValue %d \n",  adValue);
-  SerialPrintf("adLow %d \n",  adLow);
-  SerialPrintf("adHigh %d \n",  adHigh);
-  SerialPrintf("Voltage %f \n",  Voltage);
-  
-  uint8 charValue6[SIMPLEPROFILE_CHAR6_LEN] = { adHigh, adLow };      
-  SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 );
-    
-  // Call to retrieve the value of the third characteristic in the profile
-  stat = SimpleProfile_GetParameter( SIMPLEPROFILE_CHAR3, &valueToCopy);
-
-  if( stat == SUCCESS )
+  //PulseSensor
+  pulseNum += 1;
+  if(pulseNum % 2 == 0)
   {
-    /*
-     * Call to set that value of the fourth characteristic in the profile. Note
-     * that if notifications of the fourth characteristic have been enabled by
-     * a GATT client device, then a notification will be sent every time this
-     * function is called.
-     */
-    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof(uint8), &valueToCopy);
+      pulseValue = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_12);         //IN1
+      pulseLow = (uint8)(pulseValue&0xff);
+      pulseHigh = (uint8)(pulseValue>>8);
+
+      SerialPrintf("pulseValue %d \n",  pulseValue);
+      uint8 charValue6[SIMPLEPROFILE_CHAR6_LEN] = { pulseHigh, pulseLow };      
+      SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 );
+      
   }
+
+
+  
+//  Voltage=((float)adValue/2048)*3.37;
+        
+
+//  SerialPrintf("adLow %d \n",  adLow);
+//  SerialPrintf("adHigh %d \n",  adHigh);
+//  SerialPrintf("Voltage %f \n",  Voltage);
+  
+  // Call to retrieve the value of the third characteristic in the profile
+//  stat = SimpleProfile_GetParameter( SIMPLEPROFILE_CHAR3, &valueToCopy);
+//  SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof(uint8), &valueToCopy);
+
 }
 
 /*********************************************************************

@@ -5519,16 +5519,16 @@
         </option>
         <option>
           <name>XExtraOutOverride</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>SimpleBLEPeripheral.sim</state>
+          <state>SimpleBLEPeripheral_A.bin</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
           <version>11</version>
-          <state>60</state>
+          <state>57</state>
         </option>
         <option>
           <name>ExtraFormatVariant</name>
@@ -6660,16 +6660,16 @@
         </option>
         <option>
           <name>XExtraOutOverride</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>SimpleBLEPeripheral.sim</state>
+          <state>SimpleBLEPeripheral_B.bin</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
           <version>11</version>
-          <state>60</state>
+          <state>57</state>
         </option>
         <option>
           <name>ExtraFormatVariant</name>
