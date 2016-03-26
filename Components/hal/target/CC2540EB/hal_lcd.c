@@ -273,15 +273,12 @@ void HalLcdInit(void)
  **************************************************************************************************/
 void HalLcdWriteString ( char *str, uint8 option)
 {
-  
-  SerialPrintf("%s\r\n", str);
- 
+/*
 #ifdef LCD_TO_UART
-    SerialPrintf("%s\r\n", str);
     NPI_WriteTransport((uint8*)str,osal_strlen(str));
     NPI_WriteTransport("\n",1);
 #endif
-  
+*/  
 #if (HAL_LCD == TRUE)
 
   uint8 strLen = 0;
