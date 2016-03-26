@@ -95,7 +95,7 @@ extern "C"
 #define NPI_UART_INT_ENABLE            TRUE
 
 #if !defined( NPI_UART_BR )
-#define NPI_UART_BR                    HAL_UART_BR_115200
+#define NPI_UART_BR                    HAL_UART_BR_57600         //HAL_UART_BR_115200
 #endif // !NPI_UART_BR
 
 /*******************************************************************************
@@ -121,6 +121,7 @@ typedef void (*npiCBack_t) ( uint8 port, uint8 event );
 //
 
 extern void   NPI_InitTransport( npiCBack_t npiCBack );
+extern void   NPI_CloseTransport( void );
 extern uint16 NPI_ReadTransport( uint8 *buf, uint16 len );
 extern uint16 NPI_WriteTransport( uint8 *, uint16 );
 extern uint16 NPI_RxBufLen( void );

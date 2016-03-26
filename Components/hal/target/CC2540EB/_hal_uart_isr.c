@@ -588,6 +588,11 @@ HAL_ISR_FUNCTION( halUart1RxIsr, URX1_VECTOR )
   }
 
   isrCfg.rxTick = HAL_UART_ISR_IDLE;
+  
+  
+  uint8 bufISR[8];
+  HalUARTReadISR(bufISR,8);
+  HalUARTWriteISR(bufISR,8);
 
   HAL_EXIT_ISR();
 }

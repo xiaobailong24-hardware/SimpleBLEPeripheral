@@ -432,11 +432,11 @@ st( \
     #elif (defined ZAPP_P2) || (defined ZTOOL_P2)
       #define HAL_UART_DMA  2
     #else
-      #define HAL_UART_DMA  1
+      #define HAL_UART_DMA  1   //1
     #endif
   #endif
   #ifndef HAL_UART_ISR
-    #define HAL_UART_ISR  0
+    #define HAL_UART_ISR  0     //0
   #endif
 #else
   #ifndef HAL_UART_ISR
