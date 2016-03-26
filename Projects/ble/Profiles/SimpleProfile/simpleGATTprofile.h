@@ -24,33 +24,30 @@ extern "C"
  */
 
 // Profile Parameters
-//#define SIMPLEPROFILE_CHAR1                   0  // RW uint8 - Profile Characteristic 1 value 
-//#define SIMPLEPROFILE_CHAR2                   1  // RW uint8 - Profile Characteristic 2 value
-//#define SIMPLEPROFILE_CHAR3                   2  // RW uint8 - Profile Characteristic 3 value
+#define SIMPLEPROFILE_CHAR1                   0  // RW uint8 - Profile Characteristic 1 value 
+#define SIMPLEPROFILE_CHAR2                   1  // RW uint8 - Profile Characteristic 2 value
+#define SIMPLEPROFILE_CHAR3                   2  // RW uint8 - Profile Characteristic 3 value
 #define SIMPLEPROFILE_CHAR4                   3  // RW uint8 - Profile Characteristic 4 value
-//#define SIMPLEPROFILE_CHAR5                   4  // RW uint8 - Profile Characteristic 5 value
-#define SIMPLEPROFILE_CHAR6                   5  // RW uint8 - Profile Characteristic 6 value
-#define SIMPLEPROFILE_CHAR7                   6  // RW uint8 - Profile Characteristic 7 value
+#define SIMPLEPROFILE_CHAR5                   4  // RW uint8 - Profile Characteristic 4 value
+#define SIMPLEPROFILE_CHAR6                   5  // RW uint8 - Profile Characteristic 4 value
   
 // Simple Profile Service UUID
 #define SIMPLEPROFILE_SERV_UUID               0xFFF0
     
 // Key Pressed UUID
-//#define SIMPLEPROFILE_CHAR1_UUID            0xFFF1
-//#define SIMPLEPROFILE_CHAR2_UUID            0xFFF2
-//#define SIMPLEPROFILE_CHAR3_UUID            0xFFF3
+#define SIMPLEPROFILE_CHAR1_UUID            0xFFF1
+#define SIMPLEPROFILE_CHAR2_UUID            0xFFF2
+#define SIMPLEPROFILE_CHAR3_UUID            0xFFF3
 #define SIMPLEPROFILE_CHAR4_UUID            0xFFF4
-//#define SIMPLEPROFILE_CHAR5_UUID            0xFFF5      
-#define SIMPLEPROFILE_CHAR6_UUID            0xFFF6      //PulseSensor
-#define SIMPLEPROFILE_CHAR7_UUID            0xFFF7      //ECG
+#define SIMPLEPROFILE_CHAR5_UUID            0xFFF5
+#define SIMPLEPROFILE_CHAR6_UUID            0xFFF6
   
 // Simple Keys Profile Services bit fields
 #define SIMPLEPROFILE_SERVICE               0x00000001
 
 // Length of Characteristic 5 in bytes
-//#define SIMPLEPROFILE_CHAR5_LEN           5 
-#define SIMPLEPROFILE_CHAR6_LEN           2 
-#define SIMPLEPROFILE_CHAR7_LEN           16    
+#define SIMPLEPROFILE_CHAR5_LEN           5 
+#define SIMPLEPROFILE_CHAR6_LEN           2   
 
 /*********************************************************************
  * TYPEDEFS
