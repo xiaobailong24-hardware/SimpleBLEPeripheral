@@ -86,32 +86,6 @@ void NPI_InitTransport( npiCBack_t npiCBack )
 }
 
 /*******************************************************************************
- * @fn          NPI_CloseTransport
- */
-void NPI_CloseTransport(void)
-{
-  halUARTCfg_t uartConfig;
-
-  // configure UART
-  uartConfig.configured           = FALSE;
-  uartConfig.baudRate             = NPI_UART_BR;
-  uartConfig.flowControl          = NPI_UART_FC;
-  uartConfig.flowControlThreshold = NPI_UART_FC_THRESHOLD;
-  uartConfig.rx.maxBufSize        = NPI_UART_RX_BUF_SIZE;
-  uartConfig.tx.maxBufSize        = NPI_UART_TX_BUF_SIZE;
-  uartConfig.idleTimeout          = NPI_UART_IDLE_TIMEOUT;
-  uartConfig.intEnable            = NPI_UART_INT_ENABLE;
-//  uartConfig.callBackFunc         = (halUARTCBack_t)npiCBack;
-
-  // start UART
-  // Note: Assumes no issue opening UART port.
-  (void)HalUARTOpen( NPI_UART_PORT, &uartConfig );
-
-  return;
-}
-
-
-/*******************************************************************************
  * @fn          NPI_ReadTransport
  *
  * @brief       This routine reads data from the transport layer based on len,

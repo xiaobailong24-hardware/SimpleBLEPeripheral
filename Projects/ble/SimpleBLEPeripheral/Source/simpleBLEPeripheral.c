@@ -130,7 +130,7 @@ static gaprole_States_t gapProfileState = GAPROLE_INIT;
 static uint8 scanRspData[] =
 {
   // complete name
-  0x14,   // length of this data
+  0x0A,   // length of this data
   GAP_ADTYPE_LOCAL_NAME_COMPLETE,
   0x43,   // 'S'        C
   0x43,   // 'i'        C
@@ -139,18 +139,18 @@ static uint8 scanRspData[] =
   0x34,   // 'l'        4
   0x30,   // 'e'        0
   0x42,   // 'B'
-  0x4c,   // 'L'
+  0x4C,   // 'L'
   0x45,   // 'E'
-  0x50,   // 'P'
-  0x65,   // 'e'
-  0x72,   // 'r'
-  0x69,   // 'i'
-  0x70,   // 'p'
-  0x68,   // 'h'
-  0x65,   // 'e'
-  0x72,   // 'r'
-  0x61,   // 'a'
-  0x6c,   // 'l'
+//  0x50,   // 'P'
+//  0x65,   // 'e'
+//  0x72,   // 'r'
+//  0x69,   // 'i'
+//  0x70,   // 'p'
+//  0x68,   // 'h'
+//  0x65,   // 'e'
+//  0x72,   // 'r'
+//  0x61,   // 'a'
+//  0x6c,   // 'l'
 
   // connection interval range
   0x05,   // length of this data
@@ -631,7 +631,7 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
           // Display device address
           HalLcdWriteString( bdAddr2Str( ownAddress ),  HAL_LCD_LINE_2 );
           HalLcdWriteString( "Initialized",  HAL_LCD_LINE_3 );
-          NPI_WriteTransport("1\n",2);
+//          NPI_WriteTransport("1\n",2);
         #endif // (defined HAL_LCD) && (HAL_LCD == TRUE)
       }
       break;
@@ -898,24 +898,18 @@ static void NpiSerialCallback(uint8 port,uint8 events)
 {
     (void)port;
     uint8 numBytes = 0;
-//    uint8 bufNum = 0;
-    uint8 buf[128];
-    
+    uint8 buf[128]={0};    
     if(events & HAL_UART_RX_TIMEOUT)    //串口有数据
     {
-      U0CSR &= ~0x40;       //禁止接收
-      NPI_CloseTransport();
       numBytes = NPI_RxBufLen();        //读出串口缓冲区有多少字节
-      if(numBytes)
+      if(numBytes >= 16)
       {
         //从串口缓冲区读出numBytes字节数据
-        NPI_ReadTransport(buf,16);
-          NPI_WriteTransport(buf,16);          
-        SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR7, SIMPLEPROFILE_CHAR7_LEN, buf );       
+        NPI_ReadTransport(buf,numBytes);
+        NPI_WriteTransport(buf,numBytes);          
+        SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR7, SIMPLEPROFILE_CHAR7_LEN, buf );     
       }
-      U0CSR |= 0x40;        //允许接收
-      //Npi Uart Init
-      NPI_InitTransport(NpiSerialCallback);
+
     }
 }
 

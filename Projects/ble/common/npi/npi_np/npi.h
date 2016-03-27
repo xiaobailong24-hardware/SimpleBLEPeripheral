@@ -121,7 +121,6 @@ typedef void (*npiCBack_t) ( uint8 port, uint8 event );
 //
 
 extern void   NPI_InitTransport( npiCBack_t npiCBack );
-extern void   NPI_CloseTransport(void);
 extern uint16 NPI_ReadTransport( uint8 *buf, uint16 len );
 extern uint16 NPI_WriteTransport( uint8 *, uint16 );
 extern uint16 NPI_RxBufLen( void );
