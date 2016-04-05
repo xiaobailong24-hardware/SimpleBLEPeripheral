@@ -785,29 +785,30 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
  */
 static void performPeriodicTask( void )
 {
-  static uint16 pulseNum = 0;   //两秒采集一次Pulse
-  uint16 pulseValue;
-  uint8 pulseLow, pulseHigh;
-//  float Voltage = 0.0;
-  HalAdcSetReference(HAL_ADC_REF_AVDD);     //3.3V
-  
-//    //ECG
-//  uint8 numBytes = 0;
-//  uint8 bufNum = 0;
-//  uint8 buf[8];
-//  uint8 charValue7[SIMPLEPROFILE_CHAR7_LEN];
-  
   //PulseSensor
+  static uint32 pulseNum = 0;   
+  uint16 pulseValue, pcgValue;
+  uint8 pulseLow, pulseHigh, pcgLow, pcgHigh;
+  HalAdcSetReference(HAL_ADC_REF_AVDD);     //3.3V  
   pulseNum += 1;
-  if(pulseNum % 10 == 0)
+  if(pulseNum % 10 == 0)        //10毫秒采集一次Pulse
   {
-      pulseValue = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_12);         //IN1
+      pulseValue = HalAdcRead(HAL_ADC_CHANNEL_0,HAL_ADC_RESOLUTION_12);         //IN0
       pulseLow = (uint8)(pulseValue&0xff);
       pulseHigh = (uint8)(pulseValue>>8);
       uint8 charValue6[SIMPLEPROFILE_CHAR6_LEN] = { pulseHigh, pulseLow };      
       SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 );      
-  }     
+  }   
 
+  //PCG
+  if(pulseNum % 5 == 0)        //5毫秒采集一次心音
+  {
+      pcgValue = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_12);         //IN1
+      pcgLow = (uint8)(pcgValue&0xff);
+      pcgHigh = (uint8)(pcgValue>>8);
+      uint8 charValue8[SIMPLEPROFILE_CHAR8_LEN] = { pcgHigh, pcgLow };      
+      SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR8, SIMPLEPROFILE_CHAR8_LEN, charValue8 );      
+  }  
 }
 
 /*********************************************************************
@@ -893,7 +894,7 @@ char *bdAddr2Str( uint8 *pAddr )
 #endif // (defined HAL_LCD) && (HAL_LCD == TRUE)
 
 
-//串口接收回掉函数
+//串口接收回掉函数(BMD101)
 static void NpiSerialCallback(uint8 port,uint8 events)
 {
     (void)port;

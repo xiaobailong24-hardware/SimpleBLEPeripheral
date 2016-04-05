@@ -31,7 +31,7 @@
  * CONSTANTS
  */
 
-#define SERVAPP_NUM_ATTR_SUPPORTED        11
+#define SERVAPP_NUM_ATTR_SUPPORTED        14
 
 /*********************************************************************
  * TYPEDEFS
@@ -86,6 +86,12 @@ CONST uint8 simpleProfilechar6UUID[ATT_BT_UUID_SIZE] =
 CONST uint8 simpleProfilechar7UUID[ATT_BT_UUID_SIZE] =
 { 
   LO_UINT16(SIMPLEPROFILE_CHAR7_UUID), HI_UINT16(SIMPLEPROFILE_CHAR7_UUID)
+};
+
+// Characteristic 8 UUID: 0xFFF8
+CONST uint8 simpleProfilechar8UUID[ATT_BT_UUID_SIZE] =
+{ 
+  LO_UINT16(SIMPLEPROFILE_CHAR8_UUID), HI_UINT16(SIMPLEPROFILE_CHAR8_UUID)
 };
 
 /*********************************************************************
@@ -182,6 +188,15 @@ static uint8 simpleProfileChar7[SIMPLEPROFILE_CHAR7_LEN] = {1,0,0,0,0,0,0,0};
 
 // Simple Profile Characteristic 7 User Description
 static uint8 simpleProfileChar7UserDesp[17] = "ECG";
+
+// Simple Profile Characteristic 8 Properties
+static uint8 simpleProfileChar8Props = GATT_PROP_READ | GATT_PROP_WRITE;
+
+// Characteristic 8 Value
+static uint8 simpleProfileChar8[SIMPLEPROFILE_CHAR8_LEN] = { 1, 0 };
+
+// Simple Profile Characteristic 8 User Description
+static uint8 simpleProfileChar8UserDesp[17] = "PCG";
 
 /*********************************************************************
  * Profile Attributes - Table
@@ -371,6 +386,29 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
         0, 
         simpleProfileChar7UserDesp 
       },      
+       // Characteristic 8 Declaration
+    { 
+      { ATT_BT_UUID_SIZE, characterUUID },
+      GATT_PERMIT_READ, 
+      0,
+      &simpleProfileChar8Props 
+    },
+
+      // Characteristic Value 6
+      { 
+        { ATT_BT_UUID_SIZE, simpleProfilechar8UUID },
+        GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
+        0, 
+        simpleProfileChar8 
+      },
+
+      // Characteristic 6 User Description
+      { 
+        { ATT_BT_UUID_SIZE, charUserDescUUID },
+        GATT_PERMIT_READ, 
+        0, 
+        simpleProfileChar8UserDesp 
+      },  
 
 };
 
@@ -565,6 +603,16 @@ bStatus_t SimpleProfile_SetParameter( uint8 param, uint8 len, void *value )
         ret = bleInvalidRange;
       }
       break;
+    case SIMPLEPROFILE_CHAR8:
+      if ( len == SIMPLEPROFILE_CHAR8_LEN ) 
+      {
+        VOID memcpy( simpleProfileChar8, value, SIMPLEPROFILE_CHAR8_LEN );
+      }
+      else
+      {
+        ret = bleInvalidRange;
+      }
+      break;
       
     default:
       ret = INVALIDPARAMETER;
@@ -620,6 +668,10 @@ bStatus_t SimpleProfile_GetParameter( uint8 param, void *value )
       VOID memcpy( value, simpleProfileChar7, SIMPLEPROFILE_CHAR7_LEN );
       break; 
       
+    case SIMPLEPROFILE_CHAR8:
+      VOID memcpy( value, simpleProfileChar8, SIMPLEPROFILE_CHAR8_LEN );
+      break; 
+    
     default:
       ret = INVALIDPARAMETER;
       break;
@@ -696,6 +748,11 @@ static bStatus_t simpleProfile_ReadAttrCB( uint16 connHandle, gattAttribute_t *p
       case SIMPLEPROFILE_CHAR7_UUID:
         *pLen = SIMPLEPROFILE_CHAR7_LEN;
         VOID memcpy( pValue, pAttr->pValue, SIMPLEPROFILE_CHAR7_LEN );
+        break;
+      
+      case SIMPLEPROFILE_CHAR8_UUID:
+        *pLen = SIMPLEPROFILE_CHAR8_LEN;
+        VOID memcpy( pValue, pAttr->pValue, SIMPLEPROFILE_CHAR8_LEN );
         break;
         
       default:
@@ -827,6 +884,31 @@ static bStatus_t simpleProfile_WriteAttrCB( uint16 connHandle, gattAttribute_t *
             VOID memcpy( pValue, pAttr->pValue, SIMPLEPROFILE_CHAR7_LEN );
             notifyApp = SIMPLEPROFILE_CHAR7;        
         }            
+        break;
+      /////////////////////////////////////////////
+      case SIMPLEPROFILE_CHAR8_UUID:
+
+        //Validate the value
+        // Make sure it's not a blob oper
+        if ( offset == 0 )
+        {
+          if ( len != SIMPLEPROFILE_CHAR8_LEN )
+          {
+            status = ATT_ERR_INVALID_VALUE_SIZE;
+          }
+        }
+        else
+        {
+          status = ATT_ERR_ATTR_NOT_LONG;
+        }
+        
+        //Write the value
+        if ( status == SUCCESS )
+        {
+            VOID memcpy( pValue, pAttr->pValue, SIMPLEPROFILE_CHAR8_LEN );
+            notifyApp = SIMPLEPROFILE_CHAR8;        
+        }
+             
         break;
 
       case GATT_CLIENT_CHAR_CFG_UUID:
