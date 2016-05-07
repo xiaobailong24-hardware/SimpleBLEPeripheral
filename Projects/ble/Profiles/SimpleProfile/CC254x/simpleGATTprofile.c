@@ -31,7 +31,7 @@
  * CONSTANTS
  */
 
-#define SERVAPP_NUM_ATTR_SUPPORTED        14
+#define SERVAPP_NUM_ATTR_SUPPORTED        15
 
 /*********************************************************************
  * TYPEDEFS
@@ -46,35 +46,11 @@ CONST uint8 simpleProfileServUUID[ATT_BT_UUID_SIZE] =
   LO_UINT16(SIMPLEPROFILE_SERV_UUID), HI_UINT16(SIMPLEPROFILE_SERV_UUID)
 };
 
-//// Characteristic 1 UUID: 0xFFF1
-//CONST uint8 simpleProfilechar1UUID[ATT_BT_UUID_SIZE] =
-//{ 
-//  LO_UINT16(SIMPLEPROFILE_CHAR1_UUID), HI_UINT16(SIMPLEPROFILE_CHAR1_UUID)
-//};
-//
-//// Characteristic 2 UUID: 0xFFF2
-//CONST uint8 simpleProfilechar2UUID[ATT_BT_UUID_SIZE] =
-//{ 
-//  LO_UINT16(SIMPLEPROFILE_CHAR2_UUID), HI_UINT16(SIMPLEPROFILE_CHAR2_UUID)
-//};
-//
-//// Characteristic 3 UUID: 0xFFF3
-//CONST uint8 simpleProfilechar3UUID[ATT_BT_UUID_SIZE] =
-//{ 
-//  LO_UINT16(SIMPLEPROFILE_CHAR3_UUID), HI_UINT16(SIMPLEPROFILE_CHAR3_UUID)
-//};
-
 // Characteristic 4 UUID: 0xFFF4
 CONST uint8 simpleProfilechar4UUID[ATT_BT_UUID_SIZE] =
 { 
   LO_UINT16(SIMPLEPROFILE_CHAR4_UUID), HI_UINT16(SIMPLEPROFILE_CHAR4_UUID)
 };
-
-//// Characteristic 5 UUID: 0xFFF5
-//CONST uint8 simpleProfilechar5UUID[ATT_BT_UUID_SIZE] =
-//{ 
-//  LO_UINT16(SIMPLEPROFILE_CHAR5_UUID), HI_UINT16(SIMPLEPROFILE_CHAR5_UUID)
-//};
 
 // Characteristic 6 UUID: 0xFFF6
 CONST uint8 simpleProfilechar6UUID[ATT_BT_UUID_SIZE] =
@@ -115,37 +91,6 @@ static simpleProfileCBs_t *simpleProfile_AppCBs = NULL;
 // Simple Profile Service attribute
 static CONST gattAttrType_t simpleProfileService = { ATT_BT_UUID_SIZE, simpleProfileServUUID };
 
-
-//// Simple Profile Characteristic 1 Properties
-//static uint8 simpleProfileChar1Props = GATT_PROP_READ | GATT_PROP_WRITE;
-//
-//// Characteristic 1 Value
-//static uint8 simpleProfileChar1 = 0;
-//
-//// Simple Profile Characteristic 1 User Description
-//static uint8 simpleProfileChar1UserDesp[17] = "Characteristic 1";
-//
-//
-//// Simple Profile Characteristic 2 Properties
-//static uint8 simpleProfileChar2Props = GATT_PROP_READ;
-//
-//// Characteristic 2 Value
-//static uint8 simpleProfileChar2 = 0;
-//
-//// Simple Profile Characteristic 2 User Description
-//static uint8 simpleProfileChar2UserDesp[17] = "Characteristic 2";
-//
-//
-//// Simple Profile Characteristic 3 Properties
-//static uint8 simpleProfileChar3Props = GATT_PROP_WRITE;
-//
-//// Characteristic 3 Value
-//static uint8 simpleProfileChar3 = 0;
-//
-//// Simple Profile Characteristic 3 User Description
-//static uint8 simpleProfileChar3UserDesp[17] = "Characteristic 3";
-
-
 // Simple Profile Characteristic 4 Properties
 static uint8 simpleProfileChar4Props = GATT_PROP_NOTIFY;
 
@@ -161,21 +106,13 @@ static gattCharCfg_t *simpleProfileChar4Config;
 // Simple Profile Characteristic 4 User Description
 static uint8 simpleProfileChar4UserDesp[17] = "Characteristic 4";
 
-
-//// Simple Profile Characteristic 5 Properties
-//static uint8 simpleProfileChar5Props = GATT_PROP_READ;
-//
-//// Characteristic 5 Value
-//static uint8 simpleProfileChar5[SIMPLEPROFILE_CHAR5_LEN] = { 0, 0, 0, 0, 0 };
-//
-//// Simple Profile Characteristic 5 User Description
-//static uint8 simpleProfileChar5UserDesp[17] = "Characteristic 5";
-
 // Simple Profile Characteristic 6 Properties   ¿É¶Á¿ÉÐ´
-static uint8 simpleProfileChar6Props = GATT_PROP_READ | GATT_PROP_WRITE;
+static uint8 simpleProfileChar6Props = GATT_PROP_NOTIFY;
 
 // Characteristic 6 Value
-static uint8 simpleProfileChar6[SIMPLEPROFILE_CHAR6_LEN] = { 0, 0 };
+static uint8 simpleProfileChar6[SIMPLEPROFILE_CHAR6_LEN] = { 0, 1, 2 };
+
+static gattCharCfg_t *simpleProfileChar6Config;
 
 // Simple Profile Characteristic 6 User Description
 static uint8 simpleProfileChar6UserDesp[17] = "PulseSensor";
@@ -212,203 +149,116 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
     (uint8 *)&simpleProfileService            /* pValue */
   },
 
-//    // Characteristic 1 Declaration
-//    { 
-//      { ATT_BT_UUID_SIZE, characterUUID },
-//      GATT_PERMIT_READ, 
-//      0,
-//      &simpleProfileChar1Props 
-//    },
-//
-//      // Characteristic Value 1
-//      { 
-//        { ATT_BT_UUID_SIZE, simpleProfilechar1UUID },
-//        GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
-//        0, 
-//        &simpleProfileChar1 
-//      },
-//
-//      // Characteristic 1 User Description
-//      { 
-//        { ATT_BT_UUID_SIZE, charUserDescUUID },
-//        GATT_PERMIT_READ, 
-//        0, 
-//        simpleProfileChar1UserDesp 
-//      },      
-//
-//    // Characteristic 2 Declaration
-//    { 
-//      { ATT_BT_UUID_SIZE, characterUUID },
-//      GATT_PERMIT_READ, 
-//      0,
-//      &simpleProfileChar2Props 
-//    },
-//
-//      // Characteristic Value 2
-//      { 
-//        { ATT_BT_UUID_SIZE, simpleProfilechar2UUID },
-//        GATT_PERMIT_READ, 
-//        0, 
-//        &simpleProfileChar2 
-//      },
-//
-//      // Characteristic 2 User Description
-//      { 
-//        { ATT_BT_UUID_SIZE, charUserDescUUID },
-//        GATT_PERMIT_READ, 
-//        0, 
-//        simpleProfileChar2UserDesp 
-//      },           
-//      
-//    // Characteristic 3 Declaration
-//    { 
-//      { ATT_BT_UUID_SIZE, characterUUID },
-//      GATT_PERMIT_READ, 
-//      0,
-//      &simpleProfileChar3Props 
-//    },
-//
-//      // Characteristic Value 3
-//      { 
-//        { ATT_BT_UUID_SIZE, simpleProfilechar3UUID },
-//        GATT_PERMIT_WRITE, 
-//        0, 
-//        &simpleProfileChar3 
-//      },
-//
-//      // Characteristic 3 User Description
-//      { 
-//        { ATT_BT_UUID_SIZE, charUserDescUUID },
-//        GATT_PERMIT_READ, 
-//        0, 
-//        simpleProfileChar3UserDesp 
-//      },
+  // Characteristic 4 Declaration
+  { 
+    { ATT_BT_UUID_SIZE, characterUUID },
+    GATT_PERMIT_READ, 
+    0,
+    &simpleProfileChar4Props 
+  },
 
-    // Characteristic 4 Declaration
-    { 
-      { ATT_BT_UUID_SIZE, characterUUID },
-      GATT_PERMIT_READ, 
-      0,
-      &simpleProfileChar4Props 
-    },
+  // Characteristic Value 4
+  { 
+    { ATT_BT_UUID_SIZE, simpleProfilechar4UUID },
+    0, 
+    0, 
+    &simpleProfileChar4 
+  },
 
-      // Characteristic Value 4
-      { 
-        { ATT_BT_UUID_SIZE, simpleProfilechar4UUID },
-        0, 
-        0, 
-        &simpleProfileChar4 
-      },
+  // Characteristic 4 configuration
+  { 
+    { ATT_BT_UUID_SIZE, clientCharCfgUUID },
+    GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
+    0, 
+    (uint8 *)&simpleProfileChar4Config 
+  },
+  
+  // Characteristic 4 User Description
+  { 
+    { ATT_BT_UUID_SIZE, charUserDescUUID },
+    GATT_PERMIT_READ, 
+    0, 
+    simpleProfileChar4UserDesp 
+  },
+  
+  // Characteristic 6 Declaration
+  { 
+    { ATT_BT_UUID_SIZE, characterUUID },
+    GATT_PERMIT_READ, 
+    0,
+    &simpleProfileChar6Props 
+  },
 
-      // Characteristic 4 configuration
-      { 
-        { ATT_BT_UUID_SIZE, clientCharCfgUUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
-        0, 
-        (uint8 *)&simpleProfileChar4Config 
-      },
-      
-      // Characteristic 4 User Description
-      { 
-        { ATT_BT_UUID_SIZE, charUserDescUUID },
-        GATT_PERMIT_READ, 
-        0, 
-        simpleProfileChar4UserDesp 
-      },
-      
-//    // Characteristic 5 Declaration
-//    { 
-//      { ATT_BT_UUID_SIZE, characterUUID },
-//      GATT_PERMIT_READ, 
-//      0,
-//      &simpleProfileChar5Props 
-//    },
-//
-//      // Characteristic Value 5
-//      { 
-//        { ATT_BT_UUID_SIZE, simpleProfilechar5UUID },
-//        GATT_PERMIT_AUTHEN_READ, 
-//        0, 
-//        simpleProfileChar5 
-//      },
-//
-//      // Characteristic 5 User Description
-//      { 
-//        { ATT_BT_UUID_SIZE, charUserDescUUID },
-//        GATT_PERMIT_READ, 
-//        0, 
-//        simpleProfileChar5UserDesp 
-//      },
-      
-      // Characteristic 6 Declaration
-    { 
-      { ATT_BT_UUID_SIZE, characterUUID },
-      GATT_PERMIT_READ, 
-      0,
-      &simpleProfileChar6Props 
-    },
+  // Characteristic Value 6
+  { 
+    { ATT_BT_UUID_SIZE, simpleProfilechar6UUID },
+    0, 
+    0, 
+    simpleProfileChar6 
+  },
 
-      // Characteristic Value 6
-      { 
-        { ATT_BT_UUID_SIZE, simpleProfilechar6UUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
-        0, 
-        simpleProfileChar6 
-      },
+  // Characteristic 6 configuration
+  { 
+    { ATT_BT_UUID_SIZE, clientCharCfgUUID },
+    GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
+    0, 
+    (uint8 *)&simpleProfileChar6Config 
+  },
+  
+  // Characteristic 6 User Description
+  { 
+    { ATT_BT_UUID_SIZE, charUserDescUUID },
+    GATT_PERMIT_READ, 
+    0, 
+    simpleProfileChar6UserDesp 
+  },
+  
+  // Characteristic 7 Declaration
+  { 
+    { ATT_BT_UUID_SIZE, characterUUID },
+    GATT_PERMIT_READ, 
+    0,
+    &simpleProfileChar7Props 
+  },
 
-      // Characteristic 6 User Description
-      { 
-        { ATT_BT_UUID_SIZE, charUserDescUUID },
-        GATT_PERMIT_READ, 
-        0, 
-        simpleProfileChar6UserDesp 
-      },     
-      // Characteristic 7 Declaration
-    { 
-      { ATT_BT_UUID_SIZE, characterUUID },
-      GATT_PERMIT_READ, 
-      0,
-      &simpleProfileChar7Props 
-    },
+  // Characteristic Value 7
+  { 
+    { ATT_BT_UUID_SIZE, simpleProfilechar7UUID },
+    GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
+    0, 
+    simpleProfileChar7 
+  },
 
-      // Characteristic Value 7
-      { 
-        { ATT_BT_UUID_SIZE, simpleProfilechar7UUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
-        0, 
-        simpleProfileChar7 
-      },
+  // Characteristic 7 User Description
+  { 
+    { ATT_BT_UUID_SIZE, charUserDescUUID },
+    GATT_PERMIT_READ, 
+    0, 
+    simpleProfileChar7UserDesp 
+  },      
+  // Characteristic 8 Declaration
+  { 
+    { ATT_BT_UUID_SIZE, characterUUID },
+    GATT_PERMIT_READ, 
+    0,
+    &simpleProfileChar8Props 
+  },
 
-      // Characteristic 7 User Description
-      { 
-        { ATT_BT_UUID_SIZE, charUserDescUUID },
-        GATT_PERMIT_READ, 
-        0, 
-        simpleProfileChar7UserDesp 
-      },      
-       // Characteristic 8 Declaration
-    { 
-      { ATT_BT_UUID_SIZE, characterUUID },
-      GATT_PERMIT_READ, 
-      0,
-      &simpleProfileChar8Props 
-    },
+  // Characteristic Value 8
+  { 
+    { ATT_BT_UUID_SIZE, simpleProfilechar8UUID },
+    GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
+    0, 
+    simpleProfileChar8 
+  },
 
-      // Characteristic Value 6
-      { 
-        { ATT_BT_UUID_SIZE, simpleProfilechar8UUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
-        0, 
-        simpleProfileChar8 
-      },
-
-      // Characteristic 6 User Description
-      { 
-        { ATT_BT_UUID_SIZE, charUserDescUUID },
-        GATT_PERMIT_READ, 
-        0, 
-        simpleProfileChar8UserDesp 
-      },  
+  // Characteristic 8 User Description
+  { 
+    { ATT_BT_UUID_SIZE, charUserDescUUID },
+    GATT_PERMIT_READ, 
+    0, 
+    simpleProfileChar8UserDesp 
+  },  
 
 };
 
@@ -455,13 +305,20 @@ bStatus_t SimpleProfile_AddService( uint32 services )
   // Allocate Client Characteristic Configuration table
   simpleProfileChar4Config = (gattCharCfg_t *)osal_mem_alloc( sizeof(gattCharCfg_t) *
                                                               linkDBNumConns );
-  if ( simpleProfileChar4Config == NULL )
+  simpleProfileChar6Config = (gattCharCfg_t *)osal_mem_alloc( sizeof(gattCharCfg_t) *
+                                                              linkDBNumConns );
+  if ( simpleProfileChar4Config == NULL)
+  {     
+    return ( bleMemAllocError );
+  }
+  if ( simpleProfileChar6Config == NULL)
   {     
     return ( bleMemAllocError );
   }
   
   // Initialize Client Characteristic Configuration attributes
   GATTServApp_InitCharCfg( INVALID_CONNHANDLE, simpleProfileChar4Config );
+  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, simpleProfileChar6Config );
   
   if ( services & SIMPLEPROFILE_SERVICE )
   {
@@ -522,39 +379,6 @@ bStatus_t SimpleProfile_SetParameter( uint8 param, uint8 len, void *value )
   bStatus_t ret = SUCCESS;
   switch ( param )
   {
-//    case SIMPLEPROFILE_CHAR1:
-//      if ( len == sizeof ( uint8 ) ) 
-//      {
-//        simpleProfileChar1 = *((uint8*)value);
-//      }
-//      else
-//      {
-//        ret = bleInvalidRange;
-//      }
-//      break;
-//
-//    case SIMPLEPROFILE_CHAR2:
-//      if ( len == sizeof ( uint8 ) ) 
-//      {
-//        simpleProfileChar2 = *((uint8*)value);
-//      }
-//      else
-//      {
-//        ret = bleInvalidRange;
-//      }
-//      break;
-//
-//    case SIMPLEPROFILE_CHAR3:
-//      if ( len == sizeof ( uint8 ) ) 
-//      {
-//        simpleProfileChar3 = *((uint8*)value);
-//      }
-//      else
-//      {
-//        ret = bleInvalidRange;
-//      }
-//      break;
-
     case SIMPLEPROFILE_CHAR4:
       if ( len == sizeof ( uint8 ) ) 
       {
@@ -570,22 +394,15 @@ bStatus_t SimpleProfile_SetParameter( uint8 param, uint8 len, void *value )
         ret = bleInvalidRange;
       }
       break;
-
-//    case SIMPLEPROFILE_CHAR5:
-//      if ( len == SIMPLEPROFILE_CHAR5_LEN ) 
-//      {
-//        VOID memcpy( simpleProfileChar5, value, SIMPLEPROFILE_CHAR5_LEN );
-//      }
-//      else
-//      {
-//        ret = bleInvalidRange;
-//      }
-//      break;
-//      
+      
     case SIMPLEPROFILE_CHAR6:
       if ( len == SIMPLEPROFILE_CHAR6_LEN ) 
       {
-        VOID memcpy( simpleProfileChar6, value, SIMPLEPROFILE_CHAR6_LEN );
+        VOID osal_memcpy( simpleProfileChar6, value, SIMPLEPROFILE_CHAR6_LEN );
+        // See if Notification has been enabled
+        GATTServApp_ProcessCharCfg( simpleProfileChar6Config, simpleProfileChar6, FALSE,
+                                    simpleProfileAttrTbl, GATT_NUM_ATTRS( simpleProfileAttrTbl ),
+                                    INVALID_TASK_ID, simpleProfile_ReadAttrCB );
       }
       else
       {
@@ -640,29 +457,13 @@ bStatus_t SimpleProfile_GetParameter( uint8 param, void *value )
   bStatus_t ret = SUCCESS;
   switch ( param )
   {
-//    case SIMPLEPROFILE_CHAR1:
-//      *((uint8*)value) = simpleProfileChar1;
-//      break;
-//
-//    case SIMPLEPROFILE_CHAR2:
-//      *((uint8*)value) = simpleProfileChar2;
-//      break;      
-//
-//    case SIMPLEPROFILE_CHAR3:
-//      *((uint8*)value) = simpleProfileChar3;
-//      break;  
-
     case SIMPLEPROFILE_CHAR4:
       *((uint8*)value) = simpleProfileChar4;
-      break;
-
-//    case SIMPLEPROFILE_CHAR5:
-//      VOID memcpy( value, simpleProfileChar5, SIMPLEPROFILE_CHAR5_LEN );
-//      break;      
+      break;   
       
-    case SIMPLEPROFILE_CHAR6:
-      VOID memcpy( value, simpleProfileChar6, SIMPLEPROFILE_CHAR6_LEN );
-      break; 
+//    case SIMPLEPROFILE_CHAR6:
+//      VOID memcpy( value, simpleProfileChar6, SIMPLEPROFILE_CHAR6_LEN );
+//      break; 
     
     case SIMPLEPROFILE_CHAR7:
       VOID memcpy( value, simpleProfileChar7, SIMPLEPROFILE_CHAR7_LEN );
@@ -806,40 +607,6 @@ static bStatus_t simpleProfile_WriteAttrCB( uint16 connHandle, gattAttribute_t *
     uint16 uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
     switch ( uuid )
     {
-//      case SIMPLEPROFILE_CHAR1_UUID:
-//      case SIMPLEPROFILE_CHAR3_UUID:
-//
-//        //Validate the value
-//        // Make sure it's not a blob oper
-//        if ( offset == 0 )
-//        {
-//          if ( len != 1 )
-//          {
-//            status = ATT_ERR_INVALID_VALUE_SIZE;
-//          }
-//        }
-//        else
-//        {
-//          status = ATT_ERR_ATTR_NOT_LONG;
-//        }
-//        
-//        //Write the value
-//        if ( status == SUCCESS )
-//        {
-//          uint8 *pCurValue = (uint8 *)pAttr->pValue;        
-//          *pCurValue = pValue[0];
-//
-//          if( pAttr->pValue == &simpleProfileChar1 )
-//          {
-//            notifyApp = SIMPLEPROFILE_CHAR1;        
-//          }
-//          else
-//          {
-//            notifyApp = SIMPLEPROFILE_CHAR3;           
-//          }
-//        }
-//             
-//        break;
         
       case SIMPLEPROFILE_CHAR6_UUID:
 

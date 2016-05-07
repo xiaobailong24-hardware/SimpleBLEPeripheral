@@ -59,7 +59,7 @@
  */
 
 // How often to perform periodic event
-#define SBP_PERIODIC_EVT_PERIOD                   1
+#define SBP_PERIODIC_EVT_PERIOD                   200
 
 // What is the advertising interval when device is discoverable (units of 625us, 160=100ms)
 #define DEFAULT_ADVERTISING_INTERVAL          160
@@ -106,7 +106,7 @@
 /*********************************************************************
  * GLOBAL VARIABLES
  */
-
+uint8 charValue6[SIMPLEPROFILE_CHAR6_LEN] = {0,1,2,3,4,5,6,7,8,9,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0,1,2,3};
 /*********************************************************************
  * EXTERNAL VARIABLES
  */
@@ -195,7 +195,7 @@ static uint8 attDeviceName[GAP_DEVICE_NAME_LEN] = "Simple BLE Peripheral";
 static void simpleBLEPeripheral_ProcessOSALMsg( osal_event_hdr_t *pMsg );
 static void simpleBLEPeripheral_ProcessGATTMsg( gattMsgEvent_t *pMsg );
 static void peripheralStateNotificationCB( gaprole_States_t newState );
-static void performPeriodicTask( void );
+static void ppgPeriodicTask( void );
 static void simpleProfileChangeCB( uint8 paramID );
 
 #if defined( CC2540_MINIDK ) || (WEBEE_BOARD)
@@ -336,18 +336,8 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
 
   // Setup the SimpleProfile Characteristic Values
   {
-//    uint8 charValue1 = 1;
-//    uint8 charValue2 = 2;
-//    uint8 charValue3 = 3;
     uint8 charValue4 = 4;
-//    uint8 charValue5[SIMPLEPROFILE_CHAR5_LEN] = { 1, 2, 3, 4, 5 };
-//    uint8 charValue6[SIMPLEPROFILE_CHAR6_LEN] = { 1, 2 };
-//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR1, sizeof ( uint8 ), &charValue1 );
-//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR2, sizeof ( uint8 ), &charValue2 );
-//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR3, sizeof ( uint8 ), &charValue3 );
     SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof ( uint8 ), &charValue4 );
-//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR5, SIMPLEPROFILE_CHAR5_LEN, charValue5 );
-//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 );
   }
 
 
@@ -476,7 +466,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
     }
 
     // Perform periodic application task
-    performPeriodicTask();
+    ppgPeriodicTask();  //10毫秒采集一次Pulse
 
     return (events ^ SBP_PERIODIC_EVT);
   }
@@ -770,7 +760,7 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
 }
 
 /*********************************************************************
- * @fn      performPeriodicTask
+ * @fn      ppgPeriodicTask
  *
  * @brief   Perform a periodic application task. This function gets
  *          called every five seconds as a result of the SBP_PERIODIC_EVT
@@ -783,32 +773,41 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
  *
  * @return  none
  */
-static void performPeriodicTask( void )
+static void ppgPeriodicTask( void )     //10毫秒采集一次Pulse
 {
   //PulseSensor
-  static uint32 pulseNum = 0;   
-  uint16 pulseValue, pcgValue;
-  uint8 pulseLow, pulseHigh, pcgLow, pcgHigh;
+  static uint32 sensorNum = 0;   
+  static int ppg = 0;
   HalAdcSetReference(HAL_ADC_REF_AVDD);     //3.3V  
-  pulseNum += 1;
-  if(pulseNum % 10 == 0)        //10毫秒采集一次Pulse
+  sensorNum += 1;
+  charValue6[0] = ppg++;
+//  if(ppg <= 100)
+//  {
+//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 ); 
+//  }
+  
+  
+  if(ppg < 20)
   {
-      pulseValue = HalAdcRead(HAL_ADC_CHANNEL_0,HAL_ADC_RESOLUTION_12);         //IN0
-      pulseLow = (uint8)(pulseValue&0xff);
-      pulseHigh = (uint8)(pulseValue>>8);
-      uint8 charValue6[SIMPLEPROFILE_CHAR6_LEN] = { pulseHigh, pulseLow };      
-      SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 );      
-  }   
+    charValue6[ppg++] = HalAdcRead(HAL_ADC_CHANNEL_0,HAL_ADC_RESOLUTION_8);         //IN0
+  }
+  else 
+  { 
+    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 );      
+    ppg = 0;
+  }
+     
+  
 
   //PCG
-  if(pulseNum % 5 == 0)        //5毫秒采集一次心音
-  {
-      pcgValue = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_12);         //IN1
-      pcgLow = (uint8)(pcgValue&0xff);
-      pcgHigh = (uint8)(pcgValue>>8);
-      uint8 charValue8[SIMPLEPROFILE_CHAR8_LEN] = { pcgHigh, pcgLow };      
-      SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR8, SIMPLEPROFILE_CHAR8_LEN, charValue8 );      
-  }  
+//  if(sensorNum % 5 == 0)        //5毫秒采集一次心音
+//  {
+//      pcgValue = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_8);         //IN1
+//      pcgLow = (uint8)(pcgValue&0xff);
+//      pcgHigh = (uint8)(pcgValue>>8);
+//      uint8 charValue8[SIMPLEPROFILE_CHAR8_LEN] = { pcgHigh, pcgLow };      
+//      SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR8, SIMPLEPROFILE_CHAR8_LEN, charValue8 );      
+//  }  
 }
 
 /*********************************************************************
@@ -822,8 +821,8 @@ static void performPeriodicTask( void )
  */
 static void simpleProfileChangeCB( uint8 paramID )
 {
-  uint8 newValue;
-
+//  uint8 newValue,newChar6Value[20];
+  
   switch( paramID )
   {
 //    case SIMPLEPROFILE_CHAR1:
@@ -852,7 +851,7 @@ static void simpleProfileChangeCB( uint8 paramID )
 //      #endif // (defined HAL_LCD) && (HAL_LCD == TRUE)
 //
 //      break;
-
+    
     default:
       // should not reach here!
       break;

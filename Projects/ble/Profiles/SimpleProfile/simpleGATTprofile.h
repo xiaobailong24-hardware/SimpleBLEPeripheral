@@ -52,14 +52,25 @@ extern "C"
 
 // Length of Characteristic 5 in bytes
 //#define SIMPLEPROFILE_CHAR5_LEN           5 
-#define SIMPLEPROFILE_CHAR6_LEN           2 
+#define SIMPLEPROFILE_CHAR6_LEN           20 
 #define SIMPLEPROFILE_CHAR7_LEN           16    
 #define SIMPLEPROFILE_CHAR8_LEN           2 
    
 /*********************************************************************
  * TYPEDEFS
  */
+// GATT Maximum number of connections (including loopback)
+#define GATT_MAX_NUM_CONN ( MAX_NUM_LL_CONN + 1 )
 
+#if !defined ( MAX_NUM_LL_CONN )
+       #if ( CTRL_CONFIG & INIT_CFG )
+             #define MAX_NUM_LL_CONN 3
+       #elif ( !( CTRL_CONFIG & INIT_CFG ) && ( CTRL_CONFIG & ADV_CONN_CFG ) )
+             #define MAX_NUM_LL_CONN 1
+       #else // no connection needed
+             #define MAX_NUM_LL_CONN 0
+       #endif // CTRL_CONFIG=INIT_CFG
+#endif // !MAX_NUM_LL_CONN
   
 /*********************************************************************
  * MACROS
