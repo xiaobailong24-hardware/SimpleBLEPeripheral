@@ -59,7 +59,7 @@
  */
 
 // How often to perform periodic event
-#define SBP_PERIODIC_EVT_PERIOD                   200
+#define SBP_PERIODIC_EVT_PERIOD                   2
 
 // What is the advertising interval when device is discoverable (units of 625us, 160=100ms)
 #define DEFAULT_ADVERTISING_INTERVAL          160
@@ -106,7 +106,10 @@
 /*********************************************************************
  * GLOBAL VARIABLES
  */
+//PPG
 uint8 charValue6[SIMPLEPROFILE_CHAR6_LEN] = {0,1,2,3,4,5,6,7,8,9,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0,1,2,3};
+//PCG
+uint8 charValue7[SIMPLEPROFILE_CHAR7_LEN] = {0,1,2,3,4,5,6,7,8,9,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0,1,2,3};
 /*********************************************************************
  * EXTERNAL VARIABLES
  */
@@ -196,6 +199,7 @@ static void simpleBLEPeripheral_ProcessOSALMsg( osal_event_hdr_t *pMsg );
 static void simpleBLEPeripheral_ProcessGATTMsg( gattMsgEvent_t *pMsg );
 static void peripheralStateNotificationCB( gaprole_States_t newState );
 static void ppgPeriodicTask( void );
+static void pcgPeriodicTask( void );
 static void simpleProfileChangeCB( uint8 paramID );
 
 #if defined( CC2540_MINIDK ) || (WEBEE_BOARD)
@@ -459,6 +463,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
   //周期事件
   if ( events & SBP_PERIODIC_EVT )
   {
+    static int speNumber = 0;
     // Restart timer
     if ( SBP_PERIODIC_EVT_PERIOD )
     {
@@ -466,7 +471,14 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
     }
 
     // Perform periodic application task
-    ppgPeriodicTask();  //10毫秒采集一次Pulse
+    //PPG, 2*5=10ms
+    if((speNumber++)%5 == 0)
+    {
+      ppgPeriodicTask();  //10ms采集一次脉搏   
+    }
+    //PCG, 2ms
+    pcgPeriodicTask();  //2ms采集一次心音    
+    if(speNumber>=0XFFFF)speNumber=0;
 
     return (events ^ SBP_PERIODIC_EVT);
   }
@@ -773,42 +785,38 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
  *
  * @return  none
  */
-static void ppgPeriodicTask( void )     //10毫秒采集一次Pulse
+static void ppgPeriodicTask( void )     //10毫秒采集一次PPG脉搏
 {
-  //PulseSensor
-  static uint32 sensorNum = 0;   
   static int ppg = 0;
   HalAdcSetReference(HAL_ADC_REF_AVDD);     //3.3V  
-  sensorNum += 1;
-  charValue6[0] = ppg++;
-//  if(ppg <= 100)
-//  {
-//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 ); 
-//  }
-  
   
   if(ppg < 20)
   {
-    charValue6[ppg++] = HalAdcRead(HAL_ADC_CHANNEL_0,HAL_ADC_RESOLUTION_8);         //IN0
+    charValue6[ppg++] = HalAdcRead(HAL_ADC_CHANNEL_0,HAL_ADC_RESOLUTION_8);     //IN0
   }
   else 
   { 
-    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 );      
+    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 );
     ppg = 0;
   }
-     
-  
-
-  //PCG
-//  if(sensorNum % 5 == 0)        //5毫秒采集一次心音
-//  {
-//      pcgValue = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_8);         //IN1
-//      pcgLow = (uint8)(pcgValue&0xff);
-//      pcgHigh = (uint8)(pcgValue>>8);
-//      uint8 charValue8[SIMPLEPROFILE_CHAR8_LEN] = { pcgHigh, pcgLow };      
-//      SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR8, SIMPLEPROFILE_CHAR8_LEN, charValue8 );      
-//  }  
 }
+
+//PcgSensor
+static void pcgPeriodicTask( void )     //2毫秒采集一次PCG心音
+{
+  static int pcg = 0;
+  HalAdcSetReference(HAL_ADC_REF_AVDD);     //3.3V  
+  
+  if(pcg < 20)
+  {
+    charValue7[pcg++] = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_8);     //IN1
+  }
+  else 
+  { 
+    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR7, SIMPLEPROFILE_CHAR7_LEN, charValue7 );
+    pcg = 0;
+  }
+} 
 
 /*********************************************************************
  * @fn      simpleProfileChangeCB
