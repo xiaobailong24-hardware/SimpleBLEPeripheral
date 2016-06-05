@@ -59,7 +59,7 @@
  */
 
 // How often to perform periodic event
-#define SBP_PERIODIC_EVT_PERIOD                   2
+#define SBP_PERIODIC_EVT_PERIOD                   8
 
 // What is the advertising interval when device is discoverable (units of 625us, 160=100ms)
 #define DEFAULT_ADVERTISING_INTERVAL          160
@@ -108,6 +108,7 @@
  */
 //PPG
 uint8 charValue6[SIMPLEPROFILE_CHAR6_LEN] = {0,1,2,3,4,5,6,7,8,9,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0,1,2,3};
+uint8 charValue6Notify[SIMPLEPROFILE_CHAR7_LEN] = {0,1,2,3,4,5,6,7,8,9,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0,1,2,3};
 //PCG
 uint8 charValue7[SIMPLEPROFILE_CHAR7_LEN] = {0,1,2,3,4,5,6,7,8,9,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0,1,2,3};
 /*********************************************************************
@@ -199,6 +200,7 @@ static void simpleBLEPeripheral_ProcessOSALMsg( osal_event_hdr_t *pMsg );
 static void simpleBLEPeripheral_ProcessGATTMsg( gattMsgEvent_t *pMsg );
 static void peripheralStateNotificationCB( gaprole_States_t newState );
 static void ppgPeriodicTask( void );
+static void ppgNotify( void );
 static void pcgPeriodicTask( void );
 static void simpleProfileChangeCB( uint8 paramID );
 
@@ -287,6 +289,10 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
     uint16 desired_max_interval = DEFAULT_DESIRED_MAX_CONN_INTERVAL;
     uint16 desired_slave_latency = DEFAULT_DESIRED_SLAVE_LATENCY;
     uint16 desired_conn_timeout = DEFAULT_DESIRED_CONN_TIMEOUT;
+    
+    //
+    HalLedSet(HAL_LED_2,HAL_LED_MODE_OFF); //关LED2
+    HalAdcSetReference(HAL_ADC_REF_AVDD);     //3.3V  
 
     // Set the GAP Role Parameters
     GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &initial_advertising_enable );
@@ -470,16 +476,27 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
       osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PERIODIC_EVT, SBP_PERIODIC_EVT_PERIOD );
     }
 
-    // Perform periodic application task
-    //PPG, 2*5=10ms
-    if((speNumber++)%5 == 0)
-    {
-      ppgPeriodicTask();  //10ms采集一次脉搏   
+    if(speNumber <= 0xFFFF){    //采集10秒,5000
+      // Perform periodic application task
+      //PPG, 2*5=10ms
+      
+      if((speNumber++)%5 == 0)
+      {
+        ppgPeriodicTask();  //10ms采集一次脉搏  
+      }
+      if((speNumber)%250 == 0){
+          ppgNotify();//1000ms发送一次脉搏   
+      }
+      
+      //      pcgPeriodicTask();  //2ms采集一次心音   
+      //PCG, 2ms
+ 
     }
-    //PCG, 2ms
-    pcgPeriodicTask();  //2ms采集一次心音    
-    if(speNumber>=0XFFFF)speNumber=0;
-
+    else
+    {
+      speNumber=0;
+    }
+    
     return (events ^ SBP_PERIODIC_EVT);
   }
   
@@ -566,7 +583,7 @@ static void simpleBLEPeripheral_HandleKeys( uint8 shift, uint8 keys )
 
   if ( keys & HAL_KEY_SW_1 )    //S1按键
   {
-    NPI_WriteTransport("KEY K1\n",7);
+//    NPI_WriteTransport("KEY K1\n",7);
   }
 
   if ( keys & HAL_KEY_SW_2 )    //S2按键
@@ -787,18 +804,62 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
  */
 static void ppgPeriodicTask( void )     //10毫秒采集一次PPG脉搏
 {
-  static int ppg = 0;
-  HalAdcSetReference(HAL_ADC_REF_AVDD);     //3.3V  
+  static uint16 ppg = 0;
+  static uint16 ppg_nv_write_id = 1;
+//  HalAdcSetReference(HAL_ADC_REF_AVDD);     //3.3V  
   
-  if(ppg < 20)
+  if(ppg < SIMPLEPROFILE_CHAR6_LEN)
   {
-    charValue6[ppg++] = HalAdcRead(HAL_ADC_CHANNEL_0,HAL_ADC_RESOLUTION_8);     //IN0
+    charValue6[ppg++] = HalAdcRead(HAL_ADC_CHANNEL_0,HAL_ADC_RESOLUTION_8);     //IN0,P0.0
+//    charValue6[ppg++] = ppg;
   }
   else 
   { 
-    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 );
+    ///*
+    if(ppg_nv_write_id <= 20){  
+      uint8 wrStatus = osal_snv_write( BLE_NVID_CUST_START + ppg_nv_write_id, SIMPLEPROFILE_CHAR6_LEN, charValue6);    
+      if(SUCCESS == wrStatus)
+      {
+         SerialPrintf("Save \"%s\" to Snv ID %d success\r\n", charValue6, BLE_NVID_CUST_START + ppg_nv_write_id);
+         ppg_nv_write_id++;
+      }
+      else
+      {
+         NPI_WriteTransport("Save Failed\n",12);
+      }
+      
+    }
+    //*/
+        
+//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR7_LEN, charValue6Notify );
+//    SerialPrintf("\"%s\"", charValue6Notify);
     ppg = 0;
+    
   }
+}
+
+static void ppgNotify( void )     //10毫秒采集一次PPG脉搏 
+{
+  static uint16 ppg_nv_read_id = 0;
+//  NPI_WriteTransport("Hello\n",6);
+//  SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, 20, charValue6Notify );
+//  SerialPrintf("\"%s\"", charValue6Notify);
+  ///*
+  if(ppg_nv_read_id <= 20){  
+    uint8 reStatus = osal_snv_read( BLE_NVID_CUST_START + ppg_nv_read_id, SIMPLEPROFILE_CHAR6_LEN, charValue6Notify);    
+    if(SUCCESS == reStatus)
+    {
+       SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6Notify );
+       SerialPrintf("Read \"%s\" to Snv ID %d success\r\n", charValue6Notify, BLE_NVID_CUST_START + ppg_nv_read_id);
+       ppg_nv_read_id++;
+    }
+    else
+    {
+       NPI_WriteTransport("Read Failed\n",12);
+       ppg_nv_read_id++;
+    }    
+  }  
+  //*/
 }
 
 //PcgSensor
