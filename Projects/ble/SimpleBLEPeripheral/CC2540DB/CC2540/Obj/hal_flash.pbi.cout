@@ -96,7 +96,7 @@ H:\Android\Github\SimpleBLEPeripheral\Projects\ble\Profiles\Keys
 -DHAL_DMA=TRUE
 -DxPOWER_SAVING=1
 -DxPLUS_BROADCASTER=1
--DHAL_LCD=TRUE
+-DHAL_LCD=false
 -DHAL_LED=TRUE
 -DHAL_KEY=TRUE
 -DHAL_UART=TRUE

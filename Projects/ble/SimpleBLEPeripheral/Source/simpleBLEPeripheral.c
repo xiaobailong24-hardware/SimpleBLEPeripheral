@@ -59,7 +59,9 @@
  */
 
 // How often to perform periodic event
-#define SBP_PERIODIC_EVT_PERIOD                   8
+   
+#define SBP_PPG_PERI_EVT_PERIOD                   8
+#define SBP_PCG_PERI_EVT_PERIOD                   5
 
 // What is the advertising interval when device is discoverable (units of 625us, 160=100ms)
 #define DEFAULT_ADVERTISING_INTERVAL          160
@@ -108,9 +110,10 @@
  */
 //PPG
 uint8 charValue6[SIMPLEPROFILE_CHAR6_LEN] = {0,1,2,3,4,5,6,7,8,9,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0,1,2,3};
-uint8 charValue6Notify[SIMPLEPROFILE_CHAR7_LEN] = {0,1,2,3,4,5,6,7,8,9,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0,1,2,3};
+uint8 charValue6Notify[SIMPLEPROFILE_CHAR6_LEN] = {0,1,2,3,4,5,6,7,8,9,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0x10,0x11,0x12,0x13};
 //PCG
 uint8 charValue7[SIMPLEPROFILE_CHAR7_LEN] = {0,1,2,3,4,5,6,7,8,9,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0,1,2,3};
+uint8 charValue7Notify[SIMPLEPROFILE_CHAR7_LEN] = {0,1,2,3,4,5,6,7,8,9,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0x10,0x11,0x12,0x13};
 /*********************************************************************
  * EXTERNAL VARIABLES
  */
@@ -202,6 +205,7 @@ static void peripheralStateNotificationCB( gaprole_States_t newState );
 static void ppgPeriodicTask( void );
 static void ppgNotify( void );
 static void pcgPeriodicTask( void );
+static void pcgNotify( void );
 static void simpleProfileChangeCB( uint8 paramID );
 
 #if defined( CC2540_MINIDK ) || (WEBEE_BOARD)
@@ -454,81 +458,46 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
     // Start the Device
     VOID GAPRole_StartDevice( &simpleBLEPeripheral_PeripheralCBs );
     
-    //Npi Uart Init
-    NPI_InitTransport(NpiSerialCallback);
   
     // Start Bond Manager
     VOID GAPBondMgr_Register( &simpleBLEPeripheral_BondMgrCBs );
 
-    // Set timer for first periodic event
-    osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PERIODIC_EVT, SBP_PERIODIC_EVT_PERIOD );
+//    // Set timer for first periodic event
+//    osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PERIODIC_EVT, SBP_PERIODIC_EVT_PERIOD );
+//
+//    //Npi Uart Init
+//    NPI_InitTransport(NpiSerialCallback);
 
     return ( events ^ SBP_START_DEVICE_EVT );
   }
   
-  //周期事件
-  if ( events & SBP_PERIODIC_EVT )
+  //PPG周期事件
+  if ( events & SBP_PPG_PERI_EVT )
   {
     static int speNumber = 0;
     // Restart timer
-    if ( SBP_PERIODIC_EVT_PERIOD )
+    if ( SBP_PPG_PERI_EVT_PERIOD )
     {
-      osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PERIODIC_EVT, SBP_PERIODIC_EVT_PERIOD );
+      osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PPG_PERI_EVT, SBP_PPG_PERI_EVT_PERIOD );
     }
 
-    if(speNumber <= 0xFFFF){    //采集10秒,5000
+    if(speNumber <= 2000){    //采集10秒,5000
       // Perform periodic application task
-      //PPG, 2*5=10ms
+      //PPG, 8*5=40ms
       
       if((speNumber++)%5 == 0)
       {
-        ppgPeriodicTask();  //10ms采集一次脉搏  
+        ppgPeriodicTask();  //40ms采集一次脉搏  
       }
-      if((speNumber)%250 == 0){
-          ppgNotify();//1000ms发送一次脉搏   
-      }
-      
-      //      pcgPeriodicTask();  //2ms采集一次心音   
-      //PCG, 2ms
- 
     }
     else
-    {
-      speNumber=0;
+    {      
+      if((speNumber++)%200 == 0){
+          ppgNotify();//1600ms发送一次脉搏   
+      }
     }
-    
-    return (events ^ SBP_PERIODIC_EVT);
+    return (events ^ SBP_PPG_PERI_EVT);
   }
-  
-  //串口接收事件
-/*  if ( events & UART_EVENT )
-  {
-
-    NPI_WriteTransport("UART_EVENT\n",10);
-    //flash写入，一个ID可以写252个字节的数据
-    uint8 wrStatus = osal_snv_write( BLE_NVID_CUST_START, osal_strlen(SerialRxBuf), SerialRxBuf);    
-    if(SUCCESS == wrStatus)
-    {
-        SerialPrintf("Save \"%s\" to Snv ID %d success\r\n", SerialRxBuf, BLE_NVID_CUST_START);
-    }
-    else
-    {
-        NPI_WriteTransport("Save Failed\n",12);
-    }
-
-//////////////////////////串口发送Start
-    HalUARTWrite(HAL_UART_PORT_0,SerialRxBuf,osal_strlen(SerialRxBuf));
-//    uint8 charValue6[SIMPLEPROFILE_CHAR6_LEN] = { pulseHigh, pulseLow };      
-//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6 );
-    
-//////////////////////////串口发送End
-    
-    osal_memset(SerialRxBuf, 0, 128);
-    
-    return (events ^ UART_EVENT);
-  }
-*/
-  // Discard unknown events
   return 0;
 }
 
@@ -583,12 +552,19 @@ static void simpleBLEPeripheral_HandleKeys( uint8 shift, uint8 keys )
 
   if ( keys & HAL_KEY_SW_1 )    //S1按键
   {
-//    NPI_WriteTransport("KEY K1\n",7);
+    NPI_WriteTransport("KEY K1\n",7);
+//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6Notify );
   }
 
   if ( keys & HAL_KEY_SW_2 )    //S2按键
   {
     NPI_WriteTransport("KEY K2\n",7);
+//    charValue6Notify[0] ++;
+//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6Notify );
+    // Set timer for first periodic event
+    osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PPG_PERI_EVT, SBP_PPG_PERI_EVT_PERIOD );
+    //Npi Uart Init
+    NPI_InitTransport(NpiSerialCallback);
   }
 }
 #endif // #if defined( CC2540_MINIDK )
@@ -805,13 +781,13 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
 static void ppgPeriodicTask( void )     //10毫秒采集一次PPG脉搏
 {
   static uint16 ppg = 0;
-  static uint16 ppg_nv_write_id = 1;
+  static uint16 ppg_nv_write_id = 0;
 //  HalAdcSetReference(HAL_ADC_REF_AVDD);     //3.3V  
   
   if(ppg < SIMPLEPROFILE_CHAR6_LEN)
   {
     charValue6[ppg++] = HalAdcRead(HAL_ADC_CHANNEL_0,HAL_ADC_RESOLUTION_8);     //IN0,P0.0
-//    charValue6[ppg++] = ppg;
+    
   }
   else 
   { 
@@ -826,19 +802,20 @@ static void ppgPeriodicTask( void )     //10毫秒采集一次PPG脉搏
       else
       {
          NPI_WriteTransport("Save Failed\n",12);
+         ppg_nv_write_id++;
       }
       
     }
     //*/
         
-//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR7_LEN, charValue6Notify );
+//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR7_LEN, charValue6 );
 //    SerialPrintf("\"%s\"", charValue6Notify);
     ppg = 0;
     
   }
 }
 
-static void ppgNotify( void )     //10毫秒采集一次PPG脉搏 
+static void ppgNotify( void )     //PPG发送
 {
   static uint16 ppg_nv_read_id = 0;
 //  NPI_WriteTransport("Hello\n",6);
@@ -865,19 +842,63 @@ static void ppgNotify( void )     //10毫秒采集一次PPG脉搏
 //PcgSensor
 static void pcgPeriodicTask( void )     //2毫秒采集一次PCG心音
 {
-  static int pcg = 0;
-  HalAdcSetReference(HAL_ADC_REF_AVDD);     //3.3V  
+  static uint16 pcg = 0;
+  static uint16 pcg_nv_write_id = 0;
   
-  if(pcg < 20)
+  if(pcg < SIMPLEPROFILE_CHAR7_LEN)
   {
-    charValue7[pcg++] = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_8);     //IN1
+//    pcg++;
+//    charValue6[ppg] = ppg;
+    charValue7[pcg++] = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_8);     //IN0,P0.0
+    
   }
   else 
   { 
-    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR7, SIMPLEPROFILE_CHAR7_LEN, charValue7 );
+    ///*
+    if(pcg_nv_write_id <= 20){  
+//      charValue7[0] += pcg_nv_write_id;
+      uint8 wrStatus = osal_snv_write( BLE_NVID_CUST_START + pcg_nv_write_id, SIMPLEPROFILE_CHAR7_LEN, charValue7);    
+      if(SUCCESS == wrStatus)
+      {
+//         SerialPrintf("Save \"%s\" to Snv ID %d success\r\n", charValue6, BLE_NVID_CUST_START + ppg_nv_write_id);
+         pcg_nv_write_id++;
+      }
+      else
+      {
+         NPI_WriteTransport("Save Failed\n",12);
+         pcg_nv_write_id++;
+      }
+      
+    }
+    //*/
+        
+//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR7_LEN, charValue6 );
+//    SerialPrintf("\"%s\"", charValue6Notify);
     pcg = 0;
+    
   }
 } 
+
+static void pcgNotify( void )     //PCG发送
+{
+  static uint16 pcg_nv_read_id = 0;
+  ///*
+  if(pcg_nv_read_id <= 20){  
+    uint8 reStatus = osal_snv_read( BLE_NVID_CUST_START + pcg_nv_read_id, SIMPLEPROFILE_CHAR7_LEN, charValue7Notify);    
+    if(SUCCESS == reStatus)
+    {
+       SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR7_LEN, charValue7Notify );
+       SerialPrintf("Read \"%s\" to Snv ID %d success\r\n", charValue7Notify, BLE_NVID_CUST_START + pcg_nv_read_id);
+       pcg_nv_read_id++;
+    }
+    else
+    {
+       NPI_WriteTransport("Read Failed\n",12);
+       pcg_nv_read_id++;
+    }    
+  }  
+  //*/
+}
 
 /*********************************************************************
  * @fn      simpleProfileChangeCB
@@ -976,7 +997,7 @@ static void NpiSerialCallback(uint8 port,uint8 events)
         //从串口缓冲区读出numBytes字节数据
         NPI_ReadTransport(buf,numBytes);
         NPI_WriteTransport(buf,numBytes);          
-        SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR7, SIMPLEPROFILE_CHAR7_LEN, buf );     
+        SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR8, SIMPLEPROFILE_CHAR8_LEN, buf );     
       }
 
     }

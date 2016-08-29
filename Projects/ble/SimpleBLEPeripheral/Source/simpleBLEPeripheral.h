@@ -57,7 +57,10 @@ extern "C"
 // Simple BLE Peripheral Task Events
 #define SBP_START_DEVICE_EVT                              0x0001
 #define SBP_PERIODIC_EVT                                  0x0002
-#define UART_EVENT                                        0x0004
+  
+#define UART_EVENT                                        0x0004        //串口接收（心电）事件
+#define SBP_PPG_PERI_EVT                                  0x0005        //脉搏周期事件
+#define SBP_PCG_PERI_EVT                                  0x0006        //心音周期事件
 
 /*********************************************************************
  * MACROS
