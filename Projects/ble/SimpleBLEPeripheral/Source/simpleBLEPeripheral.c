@@ -1,12 +1,3 @@
-/**************************************************************************************************
-  Filename:       simpleBLEPeripheral.c
-  Revised:        $Date: 2010-08-06 08:56:11 -0700 (Fri, 06 Aug 2010) $
-  Revision:       $Revision: 23333 $
-
-  Description:    This file contains the Simple BLE Peripheral sample application
-                  for use with the CC2540 Bluetooth Low Energy Protocol Stack.
-**************************************************************************************************/
-
 /*********************************************************************
  * INCLUDES
  */
@@ -51,17 +42,13 @@
 #endif
 
 /*********************************************************************
- * MACROS
- */
-
-/*********************************************************************
  * CONSTANTS
  */
 
 // How often to perform periodic event
    
-#define SBP_PPG_PERI_EVT_PERIOD                   8
-#define SBP_PCG_PERI_EVT_PERIOD                   5
+#define SBP_PPG_PERI_EVT_PERIOD                   40
+#define SBP_PCG_PERI_EVT_PERIOD                   10
 
 // What is the advertising interval when device is discoverable (units of 625us, 160=100ms)
 #define DEFAULT_ADVERTISING_INTERVAL          160
@@ -102,10 +89,6 @@
 #define B_ADDR_STR_LEN                        15
 
 /*********************************************************************
- * TYPEDEFS
- */
-
-/*********************************************************************
  * GLOBAL VARIABLES
  */
 //PPG
@@ -126,8 +109,6 @@ uint8 charValue7Notify[SIMPLEPROFILE_CHAR7_LEN] = {0,1,2,3,4,5,6,7,8,9,0x0a,0x0b
  * LOCAL VARIABLES
  */
 
-//static uint8 SerialRxBuf[128]={0};
-//static uint8 RxIndex = 0;
 
 static uint8 simpleBLEPeripheral_TaskID;   // Task ID for internal task/event processing
 
@@ -148,16 +129,7 @@ static uint8 scanRspData[] =
   0x42,   // 'B'
   0x4C,   // 'L'
   0x45,   // 'E'
-//  0x50,   // 'P'
-//  0x65,   // 'e'
-//  0x72,   // 'r'
-//  0x69,   // 'i'
-//  0x70,   // 'p'
-//  0x68,   // 'h'
-//  0x65,   // 'e'
-//  0x72,   // 'r'
-//  0x61,   // 'a'
-//  0x6c,   // 'l'
+
 
   // connection interval range
   0x05,   // length of this data
@@ -219,7 +191,6 @@ static char *bdAddr2Str ( uint8 *pAddr );
 
 //串口接收回掉函数
 static void NpiSerialCallback(uint8 port,uint8 events);
-//void Serial_Init(void);
 
 
 /*********************************************************************
@@ -249,20 +220,6 @@ static simpleProfileCBs_t simpleBLEPeripheral_SimpleProfileCBs =
  * PUBLIC FUNCTIONS
  */
 
-/*********************************************************************
- * @fn      SimpleBLEPeripheral_Init
- *
- * @brief   Initialization function for the Simple BLE Peripheral App Task.
- *          This is called during initialization and should contain
- *          any application specific initialization (ie. hardware
- *          initialization/setup, table initialization, power up
- *          notificaiton ... ).
- *
- * @param   task_id - the ID assigned by OSAL.  This ID should be
- *                    used to send messages and set timers.
- *
- * @return  none
- */
 void SimpleBLEPeripheral_Init( uint8 task_id )
 {
   simpleBLEPeripheral_TaskID = task_id;
@@ -418,24 +375,11 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
 
 }
 
-/*********************************************************************
- * @fn      SimpleBLEPeripheral_ProcessEvent
- *
- * @brief   Simple BLE Peripheral Application Task event processor.  This function
- *          is called to process all events for the task.  Events
- *          include timers, messages and any other user defined events.
- *
- * @param   task_id  - The OSAL assigned task ID.
- * @param   events - events to process.  This is a bit map and can
- *                   contain more than one event.
- *
- * @return  events not processed
- */
+
 uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
 {
 
   VOID task_id; // OSAL required parameter that isn't used in this function
-
   if ( events & SYS_EVENT_MSG )
   {
     uint8 *pMsg;
@@ -480,36 +424,41 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
     {
       osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PPG_PERI_EVT, SBP_PPG_PERI_EVT_PERIOD );
     }
-
-    if(speNumber <= 2000){    //采集10秒,5000
-      // Perform periodic application task
-      //PPG, 8*5=40ms
-      
-      if((speNumber++)%5 == 0)
-      {
+    if(speNumber++ <= 1500){    //采集20秒,40x1500
         ppgPeriodicTask();  //40ms采集一次脉搏  
-      }
     }
-    else
-    {      
-      if((speNumber++)%200 == 0){
-          ppgNotify();//1600ms发送一次脉搏   
+    else {      
+      if((speNumber++)%50 == 0){
+          ppgNotify();//1000ms发送一次脉搏    
       }
     }
     return (events ^ SBP_PPG_PERI_EVT);
   }
+  
+   //PCG周期事件
+  if ( events & SBP_PCG_PERI_EVT )
+  {
+    static int pcgNumber = 0;
+    // Restart timer
+    if ( SBP_PCG_PERI_EVT_PERIOD )
+    {
+      osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PCG_PERI_EVT, SBP_PCG_PERI_EVT_PERIOD );
+    }
+    if(pcgNumber++ <= 2000){    //采集10秒,10x1000
+        pcgPeriodicTask();  //40ms采集一次心音 
+    }
+    else
+    {      
+      if((pcgNumber++)%400 == 0){
+          pcgNotify();//4000ms发送一次心音
+      }
+    }
+    return (events ^ SBP_PCG_PERI_EVT);
+  }
   return 0;
 }
 
-/*********************************************************************
- * @fn      simpleBLEPeripheral_ProcessOSALMsg
- *
- * @brief   Process an incoming task message.
- *
- * @param   pMsg - message to process
- *
- * @return  none
- */
+
 static void simpleBLEPeripheral_ProcessOSALMsg( osal_event_hdr_t *pMsg )
 {
   switch ( pMsg->event )
@@ -533,18 +482,7 @@ static void simpleBLEPeripheral_ProcessOSALMsg( osal_event_hdr_t *pMsg )
 }
 
 #if defined( CC2540_MINIDK ) || (WEBEE_BOARD)
-/*********************************************************************
- * @fn      simpleBLEPeripheral_HandleKeys
- *
- * @brief   Handles all key events for this device.
- *
- * @param   shift - true if in shift/alt.
- * @param   keys - bit field for key events. Valid entries:
- *                 HAL_KEY_SW_2
- *                 HAL_KEY_SW_1
- *
- * @return  none
- */
+
 static void simpleBLEPeripheral_HandleKeys( uint8 shift, uint8 keys )
 {
 
@@ -552,15 +490,14 @@ static void simpleBLEPeripheral_HandleKeys( uint8 shift, uint8 keys )
 
   if ( keys & HAL_KEY_SW_1 )    //S1按键
   {
-    NPI_WriteTransport("KEY K1\n",7);
+//    NPI_WriteTransport("KEY K1\n",7);
 //    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6Notify );
   }
 
   if ( keys & HAL_KEY_SW_2 )    //S2按键
   {
-    NPI_WriteTransport("KEY K2\n",7);
+//    NPI_WriteTransport("KEY K2\n",7);
 //    charValue6Notify[0] ++;
-//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6Notify );
     // Set timer for first periodic event
     osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PPG_PERI_EVT, SBP_PPG_PERI_EVT_PERIOD );
     //Npi Uart Init
@@ -569,27 +506,12 @@ static void simpleBLEPeripheral_HandleKeys( uint8 shift, uint8 keys )
 }
 #endif // #if defined( CC2540_MINIDK )
 
-/*********************************************************************
- * @fn      simpleBLEPeripheral_ProcessGATTMsg
- *
- * @brief   Process GATT messages
- *
- * @return  none
- */
+
 static void simpleBLEPeripheral_ProcessGATTMsg( gattMsgEvent_t *pMsg )
 {  
   GATT_bm_free( &pMsg->msg, pMsg->method );
 }
 
-/*********************************************************************
- * @fn      peripheralStateNotificationCB
- *
- * @brief   Notification from the profile of a state change.
- *
- * @param   newState - new state
- *
- * @return  none
- */
 static void peripheralStateNotificationCB( gaprole_States_t newState )
 {
 #ifdef PLUS_BROADCASTER
@@ -626,7 +548,6 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
           // Display device address
           HalLcdWriteString( bdAddr2Str( ownAddress ),  HAL_LCD_LINE_2 );
           HalLcdWriteString( "Initialized",  HAL_LCD_LINE_3 );
-//          NPI_WriteTransport("1\n",2);
         #endif // (defined HAL_LCD) && (HAL_LCD == TRUE)
       }
       break;
@@ -764,70 +685,50 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
 
 }
 
-/*********************************************************************
- * @fn      ppgPeriodicTask
- *
- * @brief   Perform a periodic application task. This function gets
- *          called every five seconds as a result of the SBP_PERIODIC_EVT
- *          OSAL event. In this example, the value of the third
- *          characteristic in the SimpleGATTProfile service is retrieved
- *          from the profile, and then copied into the value of the
- *          the fourth characteristic.
- *
- * @param   none
- *
- * @return  none
- */
-static void ppgPeriodicTask( void )     //10毫秒采集一次PPG脉搏
+//PPG采集
+static void ppgPeriodicTask( void )     
 {
   static uint16 ppg = 0;
   static uint16 ppg_nv_write_id = 0;
-//  HalAdcSetReference(HAL_ADC_REF_AVDD);     //3.3V  
   
   if(ppg < SIMPLEPROFILE_CHAR6_LEN)
   {
-    charValue6[ppg++] = HalAdcRead(HAL_ADC_CHANNEL_0,HAL_ADC_RESOLUTION_8);     //IN0,P0.0
+    charValue6[ppg++] = HalAdcRead(HAL_ADC_CHANNEL_0,HAL_ADC_RESOLUTION_8)*2;     //IN0,P0.0
     
   }
   else 
   { 
     ///*
-    if(ppg_nv_write_id <= 20){  
-      uint8 wrStatus = osal_snv_write( BLE_NVID_CUST_START + ppg_nv_write_id, SIMPLEPROFILE_CHAR6_LEN, charValue6);    
+    if(ppg_nv_write_id <= 60){  
+      uint8 wrStatus = osal_snv_write( BLE_NVID_PPG_START + ppg_nv_write_id, SIMPLEPROFILE_CHAR6_LEN, charValue6);    
       if(SUCCESS == wrStatus)
       {
-         SerialPrintf("Save \"%s\" to Snv ID %d success\r\n", charValue6, BLE_NVID_CUST_START + ppg_nv_write_id);
+         SerialPrintf("PPG--Save \"%s\" to Snv ID %d success\r\n", charValue6, BLE_NVID_PPG_START + ppg_nv_write_id);
          ppg_nv_write_id++;
       }
       else
       {
-         NPI_WriteTransport("Save Failed\n",12);
+         NPI_WriteTransport("PPG--Save Failed\n",17);
          ppg_nv_write_id++;
       }
       
     }
-    //*/
         
-//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR7_LEN, charValue6 );
-//    SerialPrintf("\"%s\"", charValue6Notify);
     ppg = 0;
     
   }
 }
-
-static void ppgNotify( void )     //PPG发送
+//PPG发送
+static void ppgNotify( void )     
 {
   static uint16 ppg_nv_read_id = 0;
-//  NPI_WriteTransport("Hello\n",6);
-//  SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, 20, charValue6Notify );
-//  SerialPrintf("\"%s\"", charValue6Notify);
   ///*
-  if(ppg_nv_read_id <= 20){  
-    uint8 reStatus = osal_snv_read( BLE_NVID_CUST_START + ppg_nv_read_id, SIMPLEPROFILE_CHAR6_LEN, charValue6Notify);    
+  if(ppg_nv_read_id <= 60){  
+    uint8 reStatus = osal_snv_read( BLE_NVID_PPG_START + ppg_nv_read_id, SIMPLEPROFILE_CHAR6_LEN, charValue6Notify);    
     if(SUCCESS == reStatus)
     {
        SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6Notify );
-       SerialPrintf("Read \"%s\" to Snv ID %d success\r\n", charValue6Notify, BLE_NVID_CUST_START + ppg_nv_read_id);
+       SerialPrintf("Read \"%s\" to Snv ID %d success\r\n", charValue6Notify, BLE_NVID_PPG_START + ppg_nv_read_id);
        ppg_nv_read_id++;
     }
     else
@@ -835,60 +736,53 @@ static void ppgNotify( void )     //PPG发送
        NPI_WriteTransport("Read Failed\n",12);
        ppg_nv_read_id++;
     }    
+  }else{
+    //PPG发送完成，开启PCG采集
+    osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PCG_PERI_EVT, SBP_PCG_PERI_EVT_PERIOD );
   }  
   //*/
 }
 
-//PcgSensor
-static void pcgPeriodicTask( void )     //2毫秒采集一次PCG心音
+//PCG采集
+static void pcgPeriodicTask( void )
 {
   static uint16 pcg = 0;
   static uint16 pcg_nv_write_id = 0;
   
   if(pcg < SIMPLEPROFILE_CHAR7_LEN)
   {
-//    pcg++;
-//    charValue6[ppg] = ppg;
-    charValue7[pcg++] = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_8);     //IN0,P0.0
-    
+    charValue7[pcg++] = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_8)*3;     //IN1,P0.1
   }
   else 
   { 
-    ///*
-    if(pcg_nv_write_id <= 20){  
-//      charValue7[0] += pcg_nv_write_id;
-      uint8 wrStatus = osal_snv_write( BLE_NVID_CUST_START + pcg_nv_write_id, SIMPLEPROFILE_CHAR7_LEN, charValue7);    
+    if(pcg_nv_write_id <= 60){  
+      uint8 wrStatus = osal_snv_write( BLE_NVID_PCG_START + pcg_nv_write_id, SIMPLEPROFILE_CHAR7_LEN, charValue7);    
       if(SUCCESS == wrStatus)
       {
-//         SerialPrintf("Save \"%s\" to Snv ID %d success\r\n", charValue6, BLE_NVID_CUST_START + ppg_nv_write_id);
+         SerialPrintf("PCG--Save \"%s\" to Snv ID %d success\r\n", charValue7, BLE_NVID_PCG_START + pcg_nv_write_id);
          pcg_nv_write_id++;
       }
       else
       {
-         NPI_WriteTransport("Save Failed\n",12);
+         NPI_WriteTransport("PCG--Save Failed\n",17);
          pcg_nv_write_id++;
       }
-      
     }
-    //*/
-        
-//    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR7_LEN, charValue6 );
-//    SerialPrintf("\"%s\"", charValue6Notify);
     pcg = 0;
-    
   }
 } 
 
-static void pcgNotify( void )     //PCG发送
+//PCG发送
+static void pcgNotify( void )     
 {
   static uint16 pcg_nv_read_id = 0;
   ///*
-  if(pcg_nv_read_id <= 20){  
-    uint8 reStatus = osal_snv_read( BLE_NVID_CUST_START + pcg_nv_read_id, SIMPLEPROFILE_CHAR7_LEN, charValue7Notify);    
+  if(pcg_nv_read_id <= 60){  
+    uint8 reStatus = osal_snv_read( BLE_NVID_PCG_START + pcg_nv_read_id, SIMPLEPROFILE_CHAR7_LEN, charValue7Notify);    
     if(SUCCESS == reStatus)
     {
-       SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR7_LEN, charValue7Notify );
-       SerialPrintf("Read \"%s\" to Snv ID %d success\r\n", charValue7Notify, BLE_NVID_CUST_START + pcg_nv_read_id);
+       SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR7, SIMPLEPROFILE_CHAR7_LEN, charValue7Notify );
+       SerialPrintf("Read \"%s\" to Snv ID %d success\r\n", charValue7Notify, BLE_NVID_PCG_START + pcg_nv_read_id);
        pcg_nv_read_id++;
     }
     else
@@ -900,15 +794,7 @@ static void pcgNotify( void )     //PCG发送
   //*/
 }
 
-/*********************************************************************
- * @fn      simpleProfileChangeCB
- *
- * @brief   Callback from SimpleBLEProfile indicating a value change
- *
- * @param   paramID - parameter ID of the value that was changed.
- *
- * @return  none
- */
+
 static void simpleProfileChangeCB( uint8 paramID )
 {
 //  uint8 newValue,newChar6Value[20];
@@ -949,14 +835,7 @@ static void simpleProfileChangeCB( uint8 paramID )
 }
 
 #if (defined HAL_LCD) && (HAL_LCD == TRUE)
-/*********************************************************************
- * @fn      bdAddr2Str
- *
- * @brief   Convert Bluetooth address to string. Only needed when
- *          LCD display is used.
- *
- * @return  none
- */
+
 char *bdAddr2Str( uint8 *pAddr )
 {
   uint8       i;

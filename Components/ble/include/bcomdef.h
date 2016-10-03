@@ -184,8 +184,14 @@ extern "C"
 #define BLE_NVID_GATT_CFG_END           0x79  //!< End of the GATT Configuration NV IDs
 
 // Customer NV Items - Range  0x80 - 0x8F - This must match the number of Bonding entries
-#define BLE_NVID_CUST_START             0x80  //!< Start of the Customer's NV IDs
-#define BLE_NVID_CUST_END               0x8F  //!< End of the Customer's NV IDs
+#define BLE_NVID_PPG_START             0x80  //!< Start of the Customer's NV IDs
+#define BLE_NVID_PPG_END               0x9F  //!< End of the Customer's NV IDs
+
+#define BLE_NVID_PCG_START             0x80  //!< Start of the Customer's NV IDs
+#define BLE_NVID_PCG_END               0xDF  //!< End of the Customer's NV IDs
+
+#define BLE_NVID_ECG_START             0xE0  //!< Start of the Customer's NV IDs
+#define BLE_NVID_ECG_END               0xFF  //!< End of the Customer's NV IDs
 
 /** @} End BLE_NV_IDS */
 
