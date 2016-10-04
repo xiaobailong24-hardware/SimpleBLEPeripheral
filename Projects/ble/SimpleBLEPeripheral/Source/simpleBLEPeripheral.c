@@ -47,7 +47,7 @@
 
 // How often to perform periodic event
    
-#define SBP_PPG_PERI_EVT_PERIOD                   40
+#define SBP_PPG_PERI_EVT_PERIOD                   10
 #define SBP_PCG_PERI_EVT_PERIOD                   10
 
 // What is the advertising interval when device is discoverable (units of 625us, 160=100ms)
@@ -424,11 +424,11 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
     {
       osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PPG_PERI_EVT, SBP_PPG_PERI_EVT_PERIOD );
     }
-    if(speNumber++ <= 1500){    //采集20秒,40x1500
+    if(speNumber++ <= 2000){    //采集20秒,40x1500
         ppgPeriodicTask();  //40ms采集一次脉搏  
     }
     else {      
-      if((speNumber++)%50 == 0){
+      if((speNumber++)%200 == 0){
           ppgNotify();//1000ms发送一次脉搏    
       }
     }
@@ -449,7 +449,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
     }
     else
     {      
-      if((pcgNumber++)%400 == 0){
+      if((pcgNumber++)%200 == 0){
           pcgNotify();//4000ms发送一次心音
       }
     }
@@ -500,8 +500,9 @@ static void simpleBLEPeripheral_HandleKeys( uint8 shift, uint8 keys )
 //    charValue6Notify[0] ++;
     // Set timer for first periodic event
     osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PPG_PERI_EVT, SBP_PPG_PERI_EVT_PERIOD );
-    //Npi Uart Init
+//    //Npi Uart Init
     NPI_InitTransport(NpiSerialCallback);
+    HalLedSet(HAL_LED_2,HAL_LED_MODE_OFF); //关LED2
   }
 }
 #endif // #if defined( CC2540_MINIDK )
@@ -686,114 +687,106 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
 }
 
 //PPG采集
-static void ppgPeriodicTask( void )     
-{
-  static uint16 ppg = 0;
-  static uint16 ppg_nv_write_id = 0;
-  
-  if(ppg < SIMPLEPROFILE_CHAR6_LEN)
-  {
-    charValue6[ppg++] = HalAdcRead(HAL_ADC_CHANNEL_0,HAL_ADC_RESOLUTION_8)*2;     //IN0,P0.0
-    
-  }
-  else 
-  { 
-    ///*
-    if(ppg_nv_write_id <= 60){  
-      uint8 wrStatus = osal_snv_write( BLE_NVID_PPG_START + ppg_nv_write_id, SIMPLEPROFILE_CHAR6_LEN, charValue6);    
-      if(SUCCESS == wrStatus)
-      {
-         SerialPrintf("PPG--Save \"%s\" to Snv ID %d success\r\n", charValue6, BLE_NVID_PPG_START + ppg_nv_write_id);
-         ppg_nv_write_id++;
-      }
-      else
-      {
-         NPI_WriteTransport("PPG--Save Failed\n",17);
-         ppg_nv_write_id++;
-      }
-      
+static void ppgPeriodicTask( void ){
+    static uint16 ppg = 0;
+    static uint16 ppg_nv_write_id = 0;
+
+    if(ppg < SIMPLEPROFILE_CHAR6_LEN){
+	charValue6[ppg++] = HalAdcRead(HAL_ADC_CHANNEL_0,HAL_ADC_RESOLUTION_8)*2;     //IN0,P0.0   
+    } else { 
+	if(ppg_nv_write_id <= 60){  
+	    uint8 wrStatus = osal_snv_write( BLE_NVID_PPG_START + ppg_nv_write_id, SIMPLEPROFILE_CHAR6_LEN, charValue6);    
+	    if(SUCCESS == wrStatus) {
+		SerialPrintf("PPG--Save \"%s\" to Snv ID %d success\r\n", charValue6, BLE_NVID_PPG_START + ppg_nv_write_id);
+		ppg_nv_write_id++;
+	    } else {
+		NPI_WriteTransport("PPG--Save Failed\n",17);
+		ppg_nv_write_id++;
+	    }      
+	    }else {
+		HalLedSet(HAL_LED_1,HAL_LED_MODE_ON); //开LED1
+	    }    
+	ppg = 0;   
     }
-        
-    ppg = 0;
-    
-  }
 }
+
 //PPG发送
 static void ppgNotify( void )     
 {
-  static uint16 ppg_nv_read_id = 0;
-  ///*
-  if(ppg_nv_read_id <= 60){  
-    uint8 reStatus = osal_snv_read( BLE_NVID_PPG_START + ppg_nv_read_id, SIMPLEPROFILE_CHAR6_LEN, charValue6Notify);    
-    if(SUCCESS == reStatus)
-    {
-       SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6Notify );
-       SerialPrintf("Read \"%s\" to Snv ID %d success\r\n", charValue6Notify, BLE_NVID_PPG_START + ppg_nv_read_id);
-       ppg_nv_read_id++;
-    }
-    else
-    {
-       NPI_WriteTransport("Read Failed\n",12);
-       ppg_nv_read_id++;
-    }    
-  }else{
-    //PPG发送完成，开启PCG采集
-    osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PCG_PERI_EVT, SBP_PCG_PERI_EVT_PERIOD );
-  }  
-  //*/
+    static uint16 ppg_nv_read_id = 0;
+    if(ppg_nv_read_id <= 60){  
+	uint8 reStatus = osal_snv_read( BLE_NVID_PPG_START + ppg_nv_read_id, SIMPLEPROFILE_CHAR6_LEN, charValue6Notify);    
+	if(SUCCESS == reStatus)
+	{
+	    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR6, SIMPLEPROFILE_CHAR6_LEN, charValue6Notify );
+	    SerialPrintf("Read \"%s\" to Snv ID %d success\r\n", charValue6Notify, BLE_NVID_PPG_START + ppg_nv_read_id);
+	    ppg_nv_read_id++;
+	}
+	else
+	{
+	    NPI_WriteTransport("Read Failed\n",12);
+	    ppg_nv_read_id++;
+	}    
+    }else{
+	//PPG发送完成，开启PCG采集
+	HalLedSet(HAL_LED_1,HAL_LED_MODE_OFF); //关LED1
+	osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_PCG_PERI_EVT, SBP_PCG_PERI_EVT_PERIOD );
+    }  
 }
 
 //PCG采集
 static void pcgPeriodicTask( void )
 {
-  static uint16 pcg = 0;
-  static uint16 pcg_nv_write_id = 0;
-  
-  if(pcg < SIMPLEPROFILE_CHAR7_LEN)
-  {
-    charValue7[pcg++] = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_8)*3;     //IN1,P0.1
-  }
-  else 
-  { 
-    if(pcg_nv_write_id <= 60){  
-      uint8 wrStatus = osal_snv_write( BLE_NVID_PCG_START + pcg_nv_write_id, SIMPLEPROFILE_CHAR7_LEN, charValue7);    
-      if(SUCCESS == wrStatus)
-      {
-         SerialPrintf("PCG--Save \"%s\" to Snv ID %d success\r\n", charValue7, BLE_NVID_PCG_START + pcg_nv_write_id);
-         pcg_nv_write_id++;
-      }
-      else
-      {
-         NPI_WriteTransport("PCG--Save Failed\n",17);
-         pcg_nv_write_id++;
-      }
+    static uint16 pcg = 0;
+    static uint16 pcg_nv_write_id = 0;
+
+    if(pcg < SIMPLEPROFILE_CHAR7_LEN)
+    {
+	charValue7[pcg++] = HalAdcRead(HAL_ADC_CHANNEL_1,HAL_ADC_RESOLUTION_8)*3;     //IN1,P0.1
     }
-    pcg = 0;
-  }
+    else 
+    { 
+	if(pcg_nv_write_id <= 60){  
+	    uint8 wrStatus = osal_snv_write( BLE_NVID_PCG_START + pcg_nv_write_id, SIMPLEPROFILE_CHAR7_LEN, charValue7);    
+	    if(SUCCESS == wrStatus) {
+		SerialPrintf("PCG--Save \"%s\" to Snv ID %d success\r\n", charValue7, BLE_NVID_PCG_START + pcg_nv_write_id);
+		pcg_nv_write_id++;
+	    } else {
+		NPI_WriteTransport("PCG--Save Failed\n",17);
+		pcg_nv_write_id++;
+	    }
+	}else{
+	    HalLedSet(HAL_LED_2,HAL_LED_MODE_ON); //开LED2
+	}
+    	pcg = 0;
+    }
 } 
 
 //PCG发送
 static void pcgNotify( void )     
 {
-  static uint16 pcg_nv_read_id = 0;
-  ///*
-  if(pcg_nv_read_id <= 60){  
-    uint8 reStatus = osal_snv_read( BLE_NVID_PCG_START + pcg_nv_read_id, SIMPLEPROFILE_CHAR7_LEN, charValue7Notify);    
-    if(SUCCESS == reStatus)
-    {
-       SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR7, SIMPLEPROFILE_CHAR7_LEN, charValue7Notify );
-       SerialPrintf("Read \"%s\" to Snv ID %d success\r\n", charValue7Notify, BLE_NVID_PCG_START + pcg_nv_read_id);
-       pcg_nv_read_id++;
-    }
-    else
-    {
-       NPI_WriteTransport("Read Failed\n",12);
-       pcg_nv_read_id++;
-    }    
-  }  
-  //*/
+    static uint16 pcg_nv_read_id = 0;
+    if(pcg_nv_read_id <= 60){  
+	uint8 reStatus = osal_snv_read( BLE_NVID_PCG_START + pcg_nv_read_id, SIMPLEPROFILE_CHAR7_LEN, charValue7Notify);    
+	if(SUCCESS == reStatus)
+	{
+	    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR7, SIMPLEPROFILE_CHAR7_LEN, charValue7Notify );
+	    SerialPrintf("Read \"%s\" to Snv ID %d success\r\n", charValue7Notify, BLE_NVID_PCG_START + pcg_nv_read_id);
+	    pcg_nv_read_id++;
+	}
+	else
+	{
+	    NPI_WriteTransport("Read Failed\n",12);
+	    pcg_nv_read_id++;
+	}    
+    }else{
+	//PPG发送完成，开启PCG采集
+	//  HalLedSet(HAL_LED_1,HAL_LED_MODE_OFF); //关LED1
+	HalLedSet(HAL_LED_2,HAL_LED_MODE_OFF); //关LED2
+	//Npi Uart Init
+	//  NPI_InitTransport(NpiSerialCallback);
+    } 
 }
-
 
 static void simpleProfileChangeCB( uint8 paramID )
 {
