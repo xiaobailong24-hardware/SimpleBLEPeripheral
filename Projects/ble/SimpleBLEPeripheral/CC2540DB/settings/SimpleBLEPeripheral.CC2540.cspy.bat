@@ -25,7 +25,7 @@ if not "%~1" == "" goto debugFile
 
 @echo on 
 
-"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\common\bin\cspybat" -f "H:\Android\Github\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\settings\SimpleBLEPeripheral.CC2540.general.xcl" --backend -f "H:\Android\Github\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\settings\SimpleBLEPeripheral.CC2540.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\common\bin\cspybat" -f "H:\Work\Code\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\settings\SimpleBLEPeripheral.CC2540.general.xcl" --backend -f "H:\Work\Code\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\settings\SimpleBLEPeripheral.CC2540.driver.xcl" 
 
 @echo off 
 goto end 
@@ -34,7 +34,7 @@ goto end
 
 @echo on 
 
-"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\common\bin\cspybat" -f "H:\Android\Github\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\settings\SimpleBLEPeripheral.CC2540.general.xcl" "--debug_file=%~1" --backend -f "H:\Android\Github\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\settings\SimpleBLEPeripheral.CC2540.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\common\bin\cspybat" -f "H:\Work\Code\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\settings\SimpleBLEPeripheral.CC2540.general.xcl" "--debug_file=%~1" --backend -f "H:\Work\Code\SimpleBLEPeripheral\Projects\ble\SimpleBLEPeripheral\CC2540DB\settings\SimpleBLEPeripheral.CC2540.driver.xcl" 
 
 @echo off 
 :end
